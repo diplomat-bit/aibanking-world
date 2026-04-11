@@ -1,16 +1,85 @@
 openapi: 3.0.1
 info:
-  title: MoneyMovementBulkSourceAccountPayeeEligibility_OpenAPI
-  description: "This API is used to inquire the eligibility source accounts for specific\
-    \ payment types for an authenticated Citi Customer. This information can be used\
-    \ to prepare a valid source list for a selected destination, or vice versa."
+  title: MoneyMovement_Eligibility_Payees
+  description: Consolidated API for Money Movement Eligibility and Payees.
   version: 1.0.0
-  x-deployment-reference: ""
-  x-linked-api: RetrievePaymentInitiationTransactionBulkSourceAccountAndPayeeEligibility
 servers:
-- url: https://127.0.0.1/openapi/v1/paymentInitiation/bulk/sourceAccountAndPayees/eligibility
+- url: https://127.0.0.1/openapi/v1/moneyMovement/eligibility-payees
 paths:
-  /:
+  /all:
+    get:
+      tags:
+      - Money Movement_Counterparty Management_Funding Account Management
+      summary: Valid destination-source account combinations for the payment type.
+      description: This API returns the combination of valid destination and source
+        accounts of all payment types for an authenticated Citi customer. This information
+        may be used to prepare valid source list for a selected destination or vice
+        versa.
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: paymentType
+        in: query
+        description: "Payment Type. This is a reference data field. Please use /v1/utilities/referenceData/{paymentType}\
+          \ resource to get valid value of this field with description."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: nextStartIndex
+        in: query
+        description: In some cases there is more data than what can be returned in
+          a single response. If there is additional data available a nextStartIndex
+          will be returned. Pass the nextStartIndex in your next request to retrieve
+          the next set of data.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidSourceDestinationAccountsResponse"
+        "204":
+          description: No Content
+          content: {}
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /bulk:
     get:
       tags:
       - Money Movement_Counterparty Management_Funding Account Management
@@ -91,6 +160,32 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
+    ValidSourceDestinationAccountsResponse:
+      type: object
+      properties:
+        sourceAccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceAccounts"
+        draweeSourceAccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/DraweeSourceAccount"
+        payeeSourceAccountCombinations:
+          type: array
+          items:
+            $ref: "#/components/schemas/PayeeSourceAccountCombinations"
+        destinationSourceAcctCombinations:
+          type: array
+          items:
+            $ref: "#/components/schemas/DestinationSourceAcctCombinations"
+        nextStartIndex:
+          type: string
+          description: In some cases there is more data than what can be returned
+            in a single response. If there is additional data available a nextStartIndex
+            will be returned. Pass the nextStartIndex in your next request to retrieve
+            the next set of data.
+          example: "11"
     RetrievePaymentInitiationTransactionBulkSourceAccountAndPayeeEligibilityResponse:
       type: object
       properties:
@@ -198,6 +293,32 @@ components:
           type: string
           description: The nick name of the account assigned by the customer
           example: James
+    DraweeSourceAccount:
+      required:
+      - currencyCode
+      - displayAccountNumber
+      - draweeId
+      type: object
+      properties:
+        draweeId:
+          type: string
+          description: Unique identifier associated with the drawee.
+          example: 824f5141524b4d58576853766c786a45376e7637576e6d35695378515a726f494c36367763776775432f453d
+        displayAccountNumber:
+          type: string
+          description: A masked account number of the drawee account that can be displayed
+            to the customer
+          example: XXXXXX2364
+        currencyCode:
+          type: string
+          description: The currency code of the drawee account in ISO 4217 format
+          example: SGD
+        accountNickName:
+          type: string
+          description: Drawee account nick name
+          example: James
+        bankDetails:
+          $ref: "#/components/schemas/BankDetails"
     PayeeSourceAccountCombinations:
       required:
       - payeeAccountCurrencyCode
@@ -228,6 +349,110 @@ components:
             \ account identifier in encrypted format.Typically, this is not displayed\
             \ to the customer,use displayAccountNumber instead."
           example: 724f5141524b4d58576853766c786a45376e7637576e6d35695378515a726f494c36367763776775432f453d
+    DestinationSourceAcctCombinations:
+      required:
+      - destinationAccountCurrencyCode
+      - destinationAccountId
+      - displayDestinationAccountNumber
+      - sourceAccountIds
+      type: object
+      properties:
+        destinationAccountId:
+          type: string
+          description: "The destination account identifier in encrypted format.Typically,\
+            \ this is not displayed to the customer."
+          example: 824f5141524b4d58576853766c786a45376e7637576e6d35695378515a726f494c36367763776775432f453d
+        displayDestinationAccountNumber:
+          type: string
+          description: A masked account number that can be displayed to the customer
+          example: XXXXXX2364
+        destinationAccountCurrencyCode:
+          type: string
+          description: The currency code of the payee account in ISO 4217 format
+          example: SGD
+        productName:
+          type: string
+          description: The name of the product
+          example: Personal Checking Account
+        availableBalance:
+          type: number
+          description: The amount available  to withdraw or transfer immediately.
+          format: double
+          example: 50000.25
+        nextPaymentAmount:
+          type: number
+          description: The next payment amount due.
+          format: double
+          example: 4500.25
+        outstandingBalance:
+          type: number
+          description: Previous balance amount.
+          format: double
+          example: 4500.25
+        minimumDueAmount:
+          type: number
+          description: Minimum due amount for a payment cycle.
+          format: double
+          example: 500.25
+        installmentAmount:
+          type: number
+          description: Installment loan payment amount
+          format: double
+          example: 1200.25
+        lastStatementDate:
+          type: string
+          description: The date of the last statement in ISO 8601 date format YYYY-MM-DD.
+          format: date
+          example: 2016-10-03
+        paymentDueDate:
+          type: string
+          description: The payment due date in ISO 8601 date format YYYY-MM-DD.
+          format: date
+          example: 2016-10-05
+        sourceAccountIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceAccountIds"
+        draweeAccountIds:
+          type: array
+          items:
+            $ref: "#/components/schemas/DraweeAccountIds"
+        accountNickName:
+          type: string
+          description: The nick name of the account assigned by the customer
+          example: James
+    BankDetails:
+      type: object
+      properties:
+        bankCode:
+          type: string
+          description: "Payee account bank code. Code assigned by a central bank,\
+            \ a bank supervisory body or a Bankers Association in a country to all\
+            \ its licensed member banks or financial institutions code"
+          example: "101"
+        bankName:
+          type: string
+          description: Payee account bank name
+          example: HSBC Bank
+    SourceAccountIds:
+      required:
+      - sourceAccountId
+      type: object
+      properties:
+        sourceAccountId:
+          type: string
+          description: "The source account identifier in encrypted format.Typically,\
+            \ this is not displayed to the customer."
+          example: 3255613852316f2b4d4d796c344e38756339654972776f663745446e6d4c32486f455a4165374a476858343d
+    DraweeAccountIds:
+      required:
+      - draweeId
+      type: object
+      properties:
+        draweeId:
+          type: string
+          description: Unique identifier associated with the drawee.
+          example: 824f5141524b4d58576853766c786a45376e7637576e6d35695378515a726f494c36367763776775432f453d
   parameters:
     Authorization:
       name: Authorization
@@ -277,3 +502,4 @@ components:
       explode: false
       schema:
         type: string
+

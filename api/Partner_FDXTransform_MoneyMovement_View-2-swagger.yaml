@@ -1,0 +1,1395 @@
+openapi: 3.0.0
+info:
+  title: Partner_FDXTransform_MoneyMovement_View
+  description: Financial Data Exchange V6.2.0 Money Movement API
+  license:
+    name: N/A
+  version: 1.0.0
+servers:
+- url: https://127.0.0.1/api/billmgmt/billpay/v2
+paths:
+  /fdx/v6/payees:
+    get:
+      tags:
+      - Payee Management
+      summary: Search for payees
+      description: Search for payees
+      operationId: searchForPayees
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The most recent authorization token. This will have the format\
+          \ Bearer + {space} + {accessToken}. Example: Bearer KGNsaWVudF9pZDpjbGllbnRfc2VjcmV0KQ==."
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: Content types that are acceptable for the response. Currently
+          we support application/json
+        required: true
+        style: simple
+        explode: false
+        schema:
+          $ref: "#/components/schemas/ContentTypes"
+      - name: x-fapi-interaction-id
+        in: header
+        description: 128 bit random UUID generated uniquely for every request
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: 4468adf1-adfe-4f85-a2c1-f29beaa1f6ee
+      - name: FDX-API-Actor-Type
+        in: header
+        description: Request type whether request comes from user or batch
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: USER
+      - name: FinancialId
+        in: header
+        description: Financial institution's routing number
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: "123456789"
+      - name: FDX-API-Data-Recipient-Id
+        in: header
+        description: The client ID received during application registration in the
+          developer portal.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: 1c5f30d9-043c-49ff-b9c4-255a923278b2
+      - name: updatedSince
+        in: query
+        description: Return items that have been created or updated since the nextUpdateId
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: "#/components/schemas/Identifier"
+      - name: offsetQuery
+        in: query
+        description: Opaque cursor used by the provider to send the next set of records
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: limitQuery
+        in: query
+        description: Number of elements that the consumer wishes to receive. Providers
+          should implement reasonable default and maximum values
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Successful operation
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PayeesResponse"
+        "400":
+          description: When invalid input is sent by client
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                invalid input:
+                  value:
+                    code: "401"
+                    message: Invalid Input
+                    debugMessage: Input sent by client does not satisfy API specification
+        "401":
+          description: When Customer with id not found
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                Customer not found:
+                  value:
+                    code: "603"
+                    message: Authentication failed
+                    debugMessage: Request lacks valid authentication credentials for
+                      the target resource
+        "403":
+          description: When customer is not authorized
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                access not configured:
+                  value:
+                    code: "602"
+                    message: Customer not authorized
+                    debugMessage: Authenticated customer does not have the authorization
+                      to perform this action
+        "500":
+          description: Server unavailable
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                Internal server error:
+                  value:
+                    code: "500"
+                    message: Internal server error
+                    debugMessage: The request failed due to an internal error server
+                      unavailability
+                Internal system unavailable:
+                  value:
+                    code: "501"
+                    message: Subsystem unavaliable
+                    debugMessage: The request failed due to an internal error/server
+                      unavailability
+        "503":
+          description: When there is a scheduled maintenance
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                System down due to maintenance:
+                  value:
+                    code: "503"
+                    message: Scheduled Maintenance
+                    debugMessage: System is down for maintenance.
+  /fdx/v6/payments:
+    get:
+      tags:
+      - Payments
+      summary: Search for payments
+      description: Search for payments
+      operationId: searchForPayments
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The most recent authorization token. This will have the format\
+          \ Bearer + {space} + {accessToken}. Example: Bearer KGNsaWVudF9pZDpjbGllbnRfc2VjcmV0KQ==."
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: Content types that are acceptable for the response. Currently
+          we support application/json
+        required: true
+        style: simple
+        explode: false
+        schema:
+          $ref: "#/components/schemas/ContentTypes"
+      - name: x-fapi-interaction-id
+        in: header
+        description: 128 bit random UUID generated uniquely for every request
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: 4468adf1-adfe-4f85-a2c1-f29beaa1f6ee
+      - name: FDX-API-Actor-Type
+        in: header
+        description: Request type whether request comes from user or batch
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: USER
+      - name: FinancialId
+        in: header
+        description: Financial institution's routing number
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: "123456789"
+      - name: FDX-API-Data-Recipient-Id
+        in: header
+        description: The client ID received during application registration in the
+          developer portal.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: 1c5f30d9-043c-49ff-b9c4-255a923278b2
+      - name: updatedSince
+        in: query
+        description: Return items that have been created or updated since the nextUpdateId
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: "#/components/schemas/Identifier"
+      - name: offsetQuery
+        in: query
+        description: Opaque cursor used by the provider to send the next set of records
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: limitQuery
+        in: query
+        description: Number of elements that the consumer wishes to receive. Providers
+          should implement reasonable default and maximum values
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Successful operation
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsResponse"
+        "400":
+          description: When invalid input is sent by client
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                invalid input:
+                  value:
+                    code: "401"
+                    message: Invalid Input
+                    debugMessage: Input sent by client does not satisfy API specification
+        "401":
+          description: When Customer with id not found
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                Customer not found:
+                  value:
+                    code: "603"
+                    message: Authentication failed
+                    debugMessage: Request lacks valid authentication credentials for
+                      the target resource
+        "403":
+          description: When customer is not authorized
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                access not configured:
+                  value:
+                    code: "602"
+                    message: Customer not authorized
+                    debugMessage: Authenticated customer does not have the authorization
+                      to perform this action
+        "500":
+          description: Server unavailable
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                Internal server error:
+                  value:
+                    code: "500"
+                    message: Internal server error
+                    debugMessage: The request failed due to an internal error server
+                      unavailability
+                Internal system unavailable:
+                  value:
+                    code: "501"
+                    message: Subsystem unavaliable
+                    debugMessage: The request failed due to an internal error/server
+                      unavailability
+        "503":
+          description: When there is a scheduled maintenance
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                System down due to maintenance:
+                  value:
+                    code: "503"
+                    message: Scheduled Maintenance
+                    debugMessage: System is down for maintenance.
+  /fdx/v6/recurring-payments:
+    get:
+      tags:
+      - Recurring Payments
+      summary: Search for recurring payments
+      description: Search for recurring payments
+      operationId: searchForRecurringPayments
+      parameters:
+      - name: Authorization
+        in: header
+        description: "The most recent authorization token. This will have the format\
+          \ Bearer + {space} + {accessToken}. Example: Bearer KGNsaWVudF9pZDpjbGllbnRfc2VjcmV0KQ==."
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: Accept
+        in: header
+        description: Content types that are acceptable for the response. Currently
+          we support application/json
+        required: true
+        style: simple
+        explode: false
+        schema:
+          $ref: "#/components/schemas/ContentTypes"
+      - name: x-fapi-interaction-id
+        in: header
+        description: 128 bit random UUID generated uniquely for every request
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: 4468adf1-adfe-4f85-a2c1-f29beaa1f6ee
+      - name: FDX-API-Actor-Type
+        in: header
+        description: Request type whether request comes from user or batch
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: USER
+      - name: FinancialId
+        in: header
+        description: Financial institution's routing number
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: "123456789"
+      - name: FDX-API-Data-Recipient-Id
+        in: header
+        description: The client ID received during application registration in the
+          developer portal.
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          default: 1c5f30d9-043c-49ff-b9c4-255a923278b2
+      - name: updatedSince
+        in: query
+        description: Return items that have been created or updated since the nextUpdateId
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: "#/components/schemas/Identifier"
+      - name: offsetQuery
+        in: query
+        description: Opaque cursor used by the provider to send the next set of records
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: limitQuery
+        in: query
+        description: Number of elements that the consumer wishes to receive. Providers
+          should implement reasonable default and maximum values
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Ok
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecurringPayments"
+        "400":
+          description: When invalid input is sent by client
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                invalid input:
+                  value:
+                    code: "401"
+                    message: Invalid Input
+                    debugMessage: Input sent by client does not satisfy API specification
+        "401":
+          description: When Customer with id not found
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                Customer not found:
+                  value:
+                    code: "603"
+                    message: Authentication failed
+                    debugMessage: Request lacks valid authentication credentials for
+                      the target resource
+        "403":
+          description: When customer is not authorized
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                access not configured:
+                  value:
+                    code: "602"
+                    message: Customer not authorized
+                    debugMessage: Authenticated customer does not have the authorization
+                      to perform this action
+        "500":
+          description: Server unavailable
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                Internal server error:
+                  value:
+                    code: "500"
+                    message: Internal server error
+                    debugMessage: The request failed due to an internal error server
+                      unavailability
+                Internal system unavailable:
+                  value:
+                    code: "501"
+                    message: Subsystem unavaliable
+                    debugMessage: The request failed due to an internal error/server
+                      unavailability
+        "503":
+          description: When there is a scheduled maintenance
+          headers:
+            x-fapi-interaction-id:
+              $ref: "#/components/headers/x-fapi-interaction-id"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                System down due to maintenance:
+                  value:
+                    code: "503"
+                    message: Scheduled Maintenance
+                    debugMessage: System is down for maintenance.
+components:
+  schemas:
+    Address:
+      title: Address
+      type: object
+      properties:
+        line1:
+          $ref: "#/components/schemas/String64"
+        line2:
+          $ref: "#/components/schemas/String64"
+        line3:
+          $ref: "#/components/schemas/String64"
+        city:
+          $ref: "#/components/schemas/String64"
+        region:
+          $ref: "#/components/schemas/String64"
+        postalCode:
+          maxLength: 16
+          type: string
+          description: Postal code
+        country:
+          $ref: "#/components/schemas/Iso3166CountryCode"
+      description: U.S. domestic address or a foreign address with country other than
+        'US'
+    Iso3166CountryCode:
+      title: ISO 3166 Country Code
+      type: string
+      description: "ISO 3166-1 alpha-2 codes as of April 5, 2023, from officially\
+        \ assigned Country Codes on [ISO Online Browsing Platform](https://www.iso.org/obp/ui/).\
+        \ Change log is at [ISO 3166 Maintenance Agency](https://www.iso.org/fr/committee/48750.html?t=3V3rukDb61p05Wd6ojyTRvE0S3Yg_fZgUjrLjHWcd9-mDmTKHOGjbX3nEJ3SqHar&view=documents#section-isodocuments-top)"
+      enum:
+      - AD
+      - AE
+      - AF
+      - AG
+      - AI
+      - AL
+      - AM
+      - AO
+      - AQ
+      - AR
+      - AS
+      - AT
+      - AU
+      - AW
+      - AX
+      - AZ
+      - BA
+      - BB
+      - BD
+      - BE
+      - BF
+      - BG
+      - BH
+      - BI
+      - BJ
+      - BL
+      - BM
+      - BN
+      - BO
+      - BQ
+      - BR
+      - BS
+      - BT
+      - BV
+      - BW
+      - BY
+      - BZ
+      - CA
+      - CC
+      - CD
+      - CF
+      - CG
+      - CH
+      - CI
+      - CK
+      - CL
+      - CM
+      - CN
+      - CO
+      - CR
+      - CU
+      - CV
+      - CW
+      - CX
+      - CY
+      - CZ
+      - DE
+      - DJ
+      - DK
+      - DM
+      - DO
+      - DZ
+      - EC
+      - EE
+      - EG
+      - EH
+      - ER
+      - ES
+      - ET
+      - FI
+      - FJ
+      - FK
+      - FM
+      - FO
+      - FR
+      - GA
+      - GB
+      - GD
+      - GE
+      - GF
+      - GG
+      - GH
+      - GI
+      - GL
+      - GM
+      - GN
+      - GP
+      - GQ
+      - GR
+      - GS
+      - GT
+      - GU
+      - GW
+      - GY
+      - HK
+      - HM
+      - HN
+      - HR
+      - HT
+      - HU
+      - ID
+      - IE
+      - IL
+      - IM
+      - IN
+      - IO
+      - IQ
+      - IR
+      - IS
+      - IT
+      - JE
+      - JM
+      - JO
+      - JP
+      - KE
+      - KG
+      - KH
+      - KI
+      - KM
+      - KN
+      - KP
+      - KR
+      - KW
+      - KY
+      - KZ
+      - LA
+      - LB
+      - LC
+      - LI
+      - LK
+      - LR
+      - LS
+      - LT
+      - LU
+      - LV
+      - LY
+      - MA
+      - MC
+      - MD
+      - ME
+      - MF
+      - MG
+      - MH
+      - MK
+      - ML
+      - MM
+      - MN
+      - MO
+      - MP
+      - MQ
+      - MR
+      - MS
+      - MT
+      - MU
+      - MV
+      - MW
+      - MX
+      - MY
+      - MZ
+      - NA
+      - NC
+      - NE
+      - NF
+      - NG
+      - NI
+      - NL
+      - "NO"
+      - NP
+      - NR
+      - NU
+      - NZ
+      - OM
+      - PA
+      - PE
+      - PF
+      - PG
+      - PH
+      - PK
+      - PL
+      - PM
+      - PN
+      - PR
+      - PS
+      - PT
+      - PW
+      - PY
+      - QA
+      - RE
+      - RO
+      - RS
+      - RU
+      - RW
+      - SA
+      - SB
+      - SC
+      - SD
+      - SE
+      - SG
+      - SH
+      - SI
+      - SJ
+      - SK
+      - SL
+      - SM
+      - SN
+      - SO
+      - SR
+      - SS
+      - ST
+      - SV
+      - SX
+      - SY
+      - SZ
+      - TC
+      - TD
+      - TF
+      - TG
+      - TH
+      - TJ
+      - TK
+      - TL
+      - TM
+      - TN
+      - TO
+      - TR
+      - TT
+      - TV
+      - TW
+      - TZ
+      - UA
+      - UG
+      - UM
+      - US
+      - UY
+      - UZ
+      - VA
+      - VC
+      - VE
+      - VG
+      - VI
+      - VN
+      - VU
+      - WF
+      - WS
+      - YE
+      - YT
+      - ZA
+      - ZM
+      - ZW
+    String64:
+      title: String 64
+      maxLength: 64
+      type: string
+      description: String of maximum length 64
+    ContentTypes:
+      title: Content Types
+      type: string
+      description: Types of document formats. (Suggested values)
+      enum:
+      - application/json
+      - application/pdf
+      - application/zip
+      - image/gif
+      - image/jpeg
+      - image/png
+      - image/tiff
+    ElectronicAddress:
+      title: Electronic Address entity
+      type: object
+      properties:
+        emailAddressText:
+          type: string
+          description: Value of the email address
+      description: Electronic address details
+    PaymentsResponse:
+      title: Payments entity
+      type: object
+      properties:
+        payments:
+          type: array
+          description: Payments retrieved by the operation
+          items:
+            $ref: "#/components/schemas/PaymentResponse"
+      description: A list of payments
+    PayeesResponse:
+      title: Merchant entity
+      type: object
+      properties:
+        payees:
+          type: array
+          items:
+            $ref: "#/components/schemas/PayeeResponse"
+      description: Payee Information
+    PayeeResponse:
+      title: Merchant entity
+      type: object
+      properties:
+        merchant:
+          $ref: "#/components/schemas/MerchantInfo"
+        payeeId:
+          $ref: "#/components/schemas/Identifier"
+        merchantAccountIds:
+          type: array
+          description: Account identifier(s) the customer has with the merchant
+          example:
+          - "88888"
+          items:
+            type: string
+        status:
+          $ref: "#/components/schemas/PartyStatus"
+        expiresTimestamp:
+          $ref: "#/components/schemas/Timestamp"
+      description: Business or person to whom bill payments can be sent for products
+        or services
+    MerchantInfo:
+      title: Merchant For Update entity
+      type: object
+      properties:
+        displayName:
+          type: string
+          example: My Cell Phone Biller
+        name:
+          type: object
+          properties:
+            company:
+              type: string
+              example: Citi
+          description: Company Name
+        address:
+          $ref: "#/components/schemas/MerchantAddress"
+        phone:
+          $ref: "#/components/schemas/TelephoneNumber"
+      description: Merchant's fields to be updated. Describes the fields that can
+        be updated by the client. Supported fields could be server dependent
+    MerchantAddress:
+      description: Customer Address Information
+      allOf:
+      - type: object
+        properties:
+          line1:
+            $ref: "#/components/schemas/Address/properties/line1"
+          city:
+            $ref: "#/components/schemas/String64"
+          region:
+            $ref: "#/components/schemas/String64"
+          postalCode:
+            type: string
+            description: Postal Code
+            example: "123456"
+    IndividualName:
+      title: Individual name
+      type: object
+      properties:
+        first:
+          type: string
+          description: First name
+        middle:
+          type: string
+          description: Middle initial
+        last:
+          type: string
+          description: Last name
+        suffix:
+          type: string
+          description: Generational or academic suffix
+      description: "First name, middle initial, last name, suffix fields"
+    CustomerName:
+      title: Customer Name entity
+      type: object
+      description: The name of an individual in their role as a customer
+      allOf:
+      - $ref: "#/components/schemas/IndividualName"
+      - type: object
+        properties:
+          prefix:
+            type: string
+            description: "Name prefix, e.g. Mr."
+          company:
+            type: string
+            description: Company name
+    DeliveryAddress:
+      title: Delivery Address
+      type: object
+      description: A delivery address and its location type
+      allOf:
+      - $ref: "#/components/schemas/Address"
+      - type: object
+        properties:
+          type:
+            $ref: "#/components/schemas/DeliveryAddressType"
+    DeliveryAddressType:
+      title: Delivery Address Type
+      type: string
+      description: The location type of an address
+      enum:
+      - BUSINESS
+      - DELIVERY
+      - HOME
+      - MAILING
+    TelephoneNumberType:
+      title: Telephone Number Type
+      type: string
+      description: Purpose or type of telephone number
+      enum:
+      - BUSINESS
+      - CELL
+      - FAX
+      - HOME
+    TelephoneNumber:
+      title: Telephone Number
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/TelephoneNumberType"
+        country:
+          maxLength: 3
+          type: string
+          description: Country calling codes defined by ITU-T recommendations E.123
+            and E.164
+        number:
+          maxLength: 15
+          pattern: \d+
+          type: string
+          description: Telephone subscriber number defined by ITU-T recommendation
+            E.164
+      description: Standard for international phone numbers
+    PaymentResponse:
+      title: Payment entity
+      type: object
+      description: Represents a payment
+      allOf:
+      - $ref: "#/components/schemas/PaymentForUpdate"
+      - required:
+        - paymentId
+        - status
+        type: object
+        properties:
+          paymentId:
+            $ref: "#/components/schemas/Identifier"
+          recurringPaymentId:
+            $ref: "#/components/schemas/Identifier"
+          processedTimestamp:
+            $ref: "#/components/schemas/Timestamp"
+          startedProcessingTimestamp:
+            $ref: "#/components/schemas/Timestamp"
+          status:
+            $ref: "#/components/schemas/PaymentStatus"
+    DateString:
+      title: Date String
+      maxLength: 10
+      type: string
+      description: "ISO 8601 full-date in format 'YYYY-MM-DD' according to [IETF RFC3339](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14)"
+      format: date
+      example: 2021-07-15
+    PaymentForUpdate:
+      title: Payment For Update entity
+      required:
+      - amount
+      - dueDate
+      - fromAccountId
+      - toPayeeId
+      type: object
+      properties:
+        fromAccountId:
+          $ref: "#/components/schemas/Identifier"
+        toPayeeId:
+          $ref: "#/components/schemas/Identifier"
+        amount:
+          minimum: 0
+          type: number
+          description: Amount for the payment. Must be positive
+        merchantAccountId:
+          type: string
+          description: User's account identifier with the merchant
+        dueDate:
+          $ref: "#/components/schemas/DateString"
+      description: Payment entity used for creation and update of a payment
+    Timestamp:
+      title: Timestamp
+      type: string
+      description: "ISO 8601 date-time in format 'YYYY-MM-DDThh:mm:ss.nnn[Z|[+|-]hh:mm]'\
+        \ according to [IETF RFC3339](https://xml2rfc.tools.ietf.org/public/rfc/html/rfc3339.html#anchor14)"
+      format: date-time
+    RecurringPayment:
+      title: Recurring Payment entity
+      type: object
+      description: A recurring payment. Financial institution is free to adjust the
+        payment date to accommodate weekends and holidays
+      allOf:
+      - $ref: "#/components/schemas/RecurringPaymentForUpdate"
+      - required:
+        - status
+        type: object
+        properties:
+          recurringPaymentId:
+            $ref: "#/components/schemas/Identifier"
+          cancelledTimestamp:
+            $ref: "#/components/schemas/Timestamp"
+          status:
+            $ref: "#/components/schemas/RecurringPaymentStatus"
+    RecurringPaymentDuration:
+      title: Recurring Payment Duration entity
+      required:
+      - type
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/RecurringPaymentDurationType"
+        numberOfTimes:
+          type: number
+          description: Maximum number of times a payment is to be sent. Required if
+            type is set to NUMBEROFTIMES
+      description: Describes a payment's duration
+    RecurringPaymentForUpdate:
+      title: Recurring Payment for Update entity
+      required:
+      - amount
+      - dueDate
+      - frequency
+      - fromAccountId
+      - toPayeeId
+      type: object
+      properties:
+        frequency:
+          $ref: "#/components/schemas/RecurringPaymentFrequency"
+        duration:
+          $ref: "#/components/schemas/RecurringPaymentDuration"
+        fromAccountId:
+          $ref: "#/components/schemas/Identifier"
+        toPayeeId:
+          $ref: "#/components/schemas/Identifier"
+        amount:
+          minimum: 0
+          type: number
+          description: Amount for the payment. Must be positive
+        merchantAccountId:
+          type: string
+          description: User's account identifier with the merchant
+        dueDate:
+          $ref: "#/components/schemas/DateString"
+      description: Used to create or update a recurring payment. Financial institution
+        is free to adjust the payment date to accommodate weekends and holidays
+    RecurringPayments:
+      title: Recurring Payments entity
+      type: object
+      properties:
+        recurringPayments:
+          type: array
+          description: Recurring payments retrieved by the operation
+          items:
+            $ref: "#/components/schemas/RecurringPayment"
+      description: A list of recurring payments
+    HttpAction:
+      title: HTTP Action Type
+      type: string
+      description: HTTP Methods to use for requests
+      enum:
+      - DELETE
+      - GET
+      - PATCH
+      - POST
+      - PUT
+    ActorType:
+      title: FDX API Actor Type
+      type: string
+      description: "Indicates whether a customer is present and has requested the\
+        \ operation (USER), or if a batch job has requested the operation (BATCH)"
+      enum:
+      - BATCH
+      - USER
+    Error:
+      title: Error
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code defined by FDX API Specification or Data Provider
+            indicating the error situation which has occurred
+        message:
+          type: string
+          description: End user displayable information which might help the customer
+            diagnose an error
+        debugMessage:
+          type: string
+          description: Message used to debug the root cause of the error. Contents
+            should not be used in consumer's business logic. Can change at any time
+            and should only be used for consumer to communicate with the data provider
+            about an issue. Provider can include an error GUID in message for their
+            use.
+      description: "An error entity which can be used at the API level for error responses\
+        \ or at the account level to indicate a problem specific to a particular account.\
+        \ See the error codes and descriptions defined in the latest FDX API Specification\
+        \ document, section 6.2 Errors"
+    FapiInteractionId:
+      title: FAPI Interaction ID
+      maxLength: 36
+      minLength: 36
+      type: string
+      description: "Universally unique identifier for this interaction, used across\
+        \ all FDX API requests and responses"
+      format: uuid
+      example: c770aef3-6784-41f7-8e0e-ff5f97bddb3a
+    Identifier:
+      title: Identifier
+      maxLength: 256
+      type: string
+      description: Value for a unique identifier
+    ContactPreferencesType:
+      title: Contact Preferences Type
+      type: string
+      description: Contact Preferences Type
+      enum:
+      - CELL
+      - EMAIL
+      - FAX
+      - LETTER
+      - PHONE
+    GovernmentIssuedIdType:
+      title: Government Issued ID Type
+      type: string
+      description: Government Issued ID Type
+      enum:
+      - DRIVERLICENSE
+      - PASSPORT
+    PartyStatus:
+      title: Party Status
+      type: string
+      description: |-
+        Defines the party lifecycle.
+          * `ACTIVE`: Party is ready to participate in money movement
+          * `DELETED`: Party has been deleted and will not move into any other state
+          * `PENDING`: Party is not yet ready to participate in money movement
+          * `REJECTED`: Party was found to be invalid and cannot participate in money movement
+      enum:
+      - ACTIVE
+      - DELETED
+      - PENDING
+      - REJECTED
+    PaymentStatus:
+      title: Payment Status
+      type: string
+      description: |-
+        Defines the payment lifecycle.
+          * `CANCELLED`: Payment was cancelled by the user
+          * `FAILED`: Payment failed for reasons other than "No Funds"
+        For example: fraud, invalid payee, source account was closed etc.
+          * `NOFUNDS`: Payment failed because of the lack of funds
+          * `PROCESSED`: The payment has been executed by the payment service provider
+          * `PROCESSING`: Payment is in the process of being executed by the payment service provider
+          * `SCHEDULED`: Payment has been scheduled
+      enum:
+      - CANCELLED
+      - FAILED
+      - NOFUNDS
+      - PROCESSED
+      - PROCESSING
+      - SCHEDULED
+    RecurringPaymentDurationType:
+      title: Recurring Payment Duration Type
+      type: string
+      description: Describes if the recurring payment has an end or will occur a fixed
+        number of times
+      enum:
+      - NOEND
+      - NUMBEROFTIMES
+    RecurringPaymentFrequency:
+      title: Recurring Payment Frequency
+      type: string
+      description: |-
+        Defines how often a payment is made relative to the starting day.
+          * `BIWEEKLY`: Every 14 days
+          * `TWICEMONTHLY`: Every 15 days
+          * `WEEKLY`: Every 7 days
+      enum:
+      - WEEKLY
+      - BIWEEKLY
+      - TWICEMONTHLY
+      - MONTHLY
+      - FOURWEEKS
+      - BIMONTHLY
+      - QUARTERLY
+      - SEMIANNUALLY
+      - ANNUALLY
+    RecurringPaymentStatus:
+      title: Recurring Payment Status
+      type: string
+      description: |-
+        Defines the recurring payment lifecycle
+          * `CANCELLED`: Recurring Payment was cancelled by the user
+          * `FAILED`: Recurring Payment failed. For example: fraud, invalid payee, source account was closed etc.
+          * `PROCESSED`: The scheduled duration of the recurrence has completed
+          * `SCHEDULED`: Recurring Payment has been scheduled
+      enum:
+      - CANCELLED
+      - FAILED
+      - PROCESSED
+      - SCHEDULED
+  parameters:
+    FapiInteractionIdHeader:
+      name: x-fapi-interaction-id
+      in: header
+      description: Unique identifier for this interaction
+      required: true
+      style: simple
+      explode: false
+      schema:
+        $ref: "#/components/schemas/FapiInteractionId"
+      example: c770aef3-6784-41f7-8e0e-ff5f97bddb3a
+    FdxApiActorTypeHeader:
+      name: FDX-API-Actor-Type
+      in: header
+      description: Identifies whether the customer is present (USER) or it is a BATCH
+        operation
+      required: false
+      style: simple
+      explode: false
+      schema:
+        $ref: "#/components/schemas/ActorType"
+    LimitQuery:
+      name: limit
+      in: query
+      description: Number of elements that the consumer wishes to receive. Providers
+        should implement reasonable default and maximum values
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: integer
+    OffsetQuery:
+      name: offset
+      in: query
+      description: Opaque cursor used by the provider to send the next set of records
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: string
+    UpdatedSinceQuery:
+      name: updatedSince
+      in: query
+      description: Return items that have been created or updated since the nextUpdateId
+      required: false
+      style: form
+      explode: true
+      schema:
+        $ref: "#/components/schemas/Identifier"
+  headers:
+    x-fapi-interaction-id:
+      description: Unique identifier for this interaction
+      style: simple
+      explode: false
+      schema:
+        $ref: "#/components/schemas/FapiInteractionId"
+      example: c770aef3-6784-41f7-8e0e-ff5f97bddb3a
+  securitySchemes:
+    OAuthFapi1Advanced:
+      type: oauth2
+      description: |-
+        This authorization protocol uses FAPI Security Profile 1.0 Part Two — Advanced. To be used with the FDX API customer data domains. In addition, these operations employ the FDX User Consent framework for permissioned data sharing.
+        Client must comply with [5.2.3 Confidential client](https://openid.net/specs/openid-financial-api-part-2-1_0.html#confidential-client). Authorization server must comply with the [5.2.2 Authorization server](https://openid.net/specs/openid-financial-api-part-2-1_0.html#authorization-server).
+        Client, authorization server and resource server requirements described in full by:
+          * [FAPI Security Profile 1.0 Part Two — Advanced](https://openid.net/specs/openid-financial-api-part-2-1_0.html)
+          * FDX API Security Model specification published with the FDX API
+
+        Consent User Experience and Issuance described by:
+          * FDX User Experience Guidelines published with the FDX API
+          * Consent API operations and data structures published within the FDX API
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.fi.com/fdx/v6/par
+          tokenUrl: https://auth.fi.com/fdx/v6/token
+          scopes:
+            fdx:accountbasic:read: "Scope authorizing retrieval of account display\
+              \ name, masked account number, type, description"
+            fdx:accountdetailed:read: "Scope authorizing retrieval of account information.\
+              \ Includes data from \"Basic\" + account balances, credit limits, due\
+              \ dates, interest rates, rewards balances, recurrences"
+            fdx:accountpayments:read: "Deprecated and replaced with `fdx:paymentsupport:read`\
+              \ in FDX release V6.1.0, `fdx:accountpayments:read` will be removed\
+              \ with V7 release"
+            fdx:bills:read: Scope authorizing retrieval of bill payments data
+            fdx:customercontact:read: "Scope authorizing retrieval of name, email,\
+              \ address, phone on file with this institution. Applies to both user\
+              \ and other account holders"
+            fdx:customerpersonal:read: "Scope authorizing retrieval of name, email,\
+              \ address, phone, DoB, tax ID, SSN on file with this institution"
+            fdx:images:read: "Scope authorizing retrieval of check and receipt images,\
+              \ which may include PII such as name, full account and routing number"
+            fdx:investments:read: Scope authorizing retrieval of details about individual
+              underlying investment positions
+            fdx:paymentsupport:read: Scope authorizing retrieval of full account number
+              and payment network routing number
+            fdx:rewards:read: "Scope authorizing retrieval of loyalty rewards programs,\
+              \ transactions and balances"
+            fdx:statements:read: "Scope authorizing retrieval of periodic PDF statement\
+              \ showing personal information, account and transaction details. May\
+              \ contain PII such as name, address"
+            fdx:tax:read: "Scope authorizing retrieval of information reporting tax\
+              \ forms and data, including any PII such as name, address, tax ID and\
+              \ account number"
+            fdx:transactions:read: "Scope authorizing retrieval of historical and\
+              \ current transactions, transaction types, amounts, dates and descriptions"
+            offline_access: Scope authorizing the client to refresh `access_tokens`
+              without user present
+            openid: Scope authorizing access to the user's identity details

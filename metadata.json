@@ -1,0 +1,15 @@
+{
+  "name": "Aquarius AI Sovereign Singularity",
+  "description": "A neural-fortress OS that makes centralized identity designs irrelevant through superior Aquarius Legion AI modules.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+aquarius",
+      "url": "/?portal=%s"
+    }
+  ]
+}

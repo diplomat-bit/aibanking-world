@@ -1,0 +1,499 @@
+openapi: 3.0.1
+info:
+  title: MoneyMovement_Transfers_International
+  description: Consolidated API for Money Movement International Transfers.
+  version: 1.0.0
+servers:
+- url: https://127.0.0.1/openapi/v1/moneyMovement/transfers/international
+paths:
+  /payees/sourceAccounts:
+    get:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: Retrieve Destination Source Account Cross Border Transfer
+      description: "This API returns the valid combinations of cross border transfer\
+        \ destination and source accounts. This information may be used to prepare\
+        \ a valid source list for a selected destination, or vice versa."
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: paymentType
+        in: query
+        description: "Type of the payment. This is a reference data field. Please\
+          \ use /v1/utilities/referenceData/{paymentType} resource to get valid values\
+          \ of this field with descriptions."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: nextStartIndex
+        in: query
+        description: In some cases there is more data than what can be returned in
+          a single response. If there is additional data available a nextStartIndex
+          will be returned. Pass the nextStartIndex in your next request to retrieve
+          the next set of data.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrossBorderWireTransfersAccountPayeeEligibilityResponse"
+        "204":
+          description: No Content
+          content: {}
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /preprocess:
+    post:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: Create Cross Border Transfer
+      description: This API allows you to pre process the Cross Border Wire Transfers.
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrossBorderWireTransfersPreprocessRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrossBorderWireTransfersPreprocessResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr><tr><td>error</td><td>invalidPayee</td><td>Payee
+            is invalid</td></tr><tr><td>error</td><td>invalidSourceAccount</td><td>Source
+            account is invalid</td></tr><tr><td>error</td><td>invalidAccountCombination</td><td>Invalid
+            source and destination account combination</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: CrossBorderWireTransfersPreprocessRequest
+  /preprocess/adhoc:
+    post:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: Create Adhoc Cross Border Transfer
+      description: This API is used to create a new cross border transfer to an adhoc
+        destination and verifies there are no errors. The destination does not need
+        to be in a payee list. The response from this resource should be used to construct
+        a pre-confirmation page so the customer can review the transaction before
+        confirming.
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdhocCrossBorderWireTransfersPreprocessRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdhocCrossBorderWireTransfersPreprocessResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr><tr><td>error</td><td>invalidAccount</td><td>Account
+            is invalid</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: AdhocCrossBorderWireTransfersPreprocessRequest
+  /:
+    post:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: Confirm Cross Border Transfer
+      description: "This API is used to confirms the cross border transfer. It should\
+        \ be called after successfully creating the cross border transfer. If successful,\
+        \ it will return a confirmation number that should be displayed and stored."
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CrossBorderWireTransfersRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrossBorderWireTransfersResponse"
+        "202":
+          description: "Accepted –The request has been accepted for processing , but\
+            \ has not been completed."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CrossBorderWireTransfersResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr><tr><td>error</td><td>invalidControlFlowId</td><td>Control
+            flow ID is invalid</td></tr><tr><td>error</td><td>preprocessFxRateExpired</td><td>Pre-process
+            forex rate is expired</td></tr><tr><tr><td>error</td><td>transactionAmountBelowLimit</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>transactionAmountLimitExceeded</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>insufficientFund</td><td>Insufficient
+            fund</td></tr><tr><td>error</td><td>dailyTransactionAmountLimitReached</td><td>Maximum
+            daily transaction amount limit reached</td></tr><tr><td>error</td><td>invalidDateRange</td><td>Date
+            range is invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr><tr><td>error</td><td>mfaRequired</td><td>MFA
+            is required</td></tr><tr><td>error</td><td>transactionDenied</td><td>Transaction
+            Denied</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: CrossBorderWireTransfersRequest
+components:
+  schemas:
+    CrossBorderWireTransfersAccountPayeeEligibilityResponse:
+      required:
+      - sourceAccounts
+      type: object
+      properties:
+        sourceAccounts:
+          type: array
+          items:
+            $ref: "#/components/schemas/SourceAccounts"
+        payeeSourceAccountCombinations:
+          type: array
+          items:
+            $ref: "#/components/schemas/PayeeSourceAccountCombinations"
+        nextStartIndex:
+          type: string
+          description: In some cases there is more data than what can be returned
+            in a single response. If there is additional data available a nextStartIndex
+            will be returned. Pass the nextStartIndex in your next request to retrieve
+            the next set of data.
+          example: "11"
+    CrossBorderWireTransfersPreprocessRequest:
+      required:
+      - chargeBearer
+      - payeeId
+      - sourceAccountId
+      - transactionAmount
+      type: object
+      properties:
+        sourceAccountId:
+          type: string
+          description: "The source account identifier in encrypted format.Typically,\
+            \ this is not displayed to the customer."
+          example: 3255613852316f2b4d4d796c344e38756339654972776f663745446e6d4c32486f455a4165374a476858343d
+        payeeId:
+          type: string
+          description: "The payee identifier in encrypted format.Typically, this is\
+            \ not displayed to the customer."
+          example: C$0003019202$AU$XX$01000540000001
+        transactionAmount:
+          type: number
+          description: The transaction amount
+          format: double
+          example: 4500.25
+        transactionCurrencyCode:
+          type: string
+          description: The currency code for the transaction amount in ISO 4217 format.
+          example: PLN
+        chargeBearer:
+          type: string
+          description: "Field to identify charge bearer.The acceptable forms of remittance\
+            \ for a given payments and transfer transaction.This is a reference data\
+            \ field. Please use /v1/utilities/referenceData/{chargeBearer} resource\
+            \ to get valid value of this field with description."
+          example: BENEFICIARY
+        paymentScheduleType:
+          type: string
+          description: "The payment schedule type. This is a reference data. Please\
+            \ use /v1/utilities/referenceData/{paymentScheduleType} resource to get\
+            \ valid value of this field."
+          example: IMMEDIATE
+        futureDatedTransaction:
+          $ref: "#/components/schemas/FutureDatedTransaction"
+        standingInstruction:
+          $ref: "#/components/schemas/StandingInstruction"
+        remarks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Remarks"
+    CrossBorderWireTransfersPreprocessResponse:
+      required:
+      - controlFlowId
+      type: object
+      properties:
+        controlFlowId:
+          type: string
+          description: Control flow Id
+          example: "12345678"
+        debitDetails:
+          $ref: "#/components/schemas/DebitDetails"
+        creditDetails:
+          $ref: "#/components/schemas/CreditDetails"
+        foreignExchangeRate:
+          type: number
+          description: 'The exchange rate that is applicable for the particular transfer. '
+          format: double
+          example: 1.8001
+        transactionFee:
+          type: number
+          description: The charges that is being charged by the source bank for doing
+            the transfer.
+          format: double
+          example: 25.25
+        feeCurrencyCode:
+          type: string
+          description: Fee currency code in ISO 4217 Format.
+          example: PLN
+    ErrorResponse:
+      required:
+      - code
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: Invalid - Request did not confirm to the specification and
+            was unprocessed and rejected. Please fix the value and try again
+          enum:
+          - error
+          - warn
+          - invalid
+          - fatal
+        code:
+          type: string
+          description: Error code which qualifies the error
+        details:
+          type: string
+          description: Human readable explanation specific to the occurrence of the
+            problem
+        location:
+          type: string
+          description: The name of the field that resulted in the error
+        moreInfo:
+          type: object
+          properties: {}
+          description: URI to human readable documentation of the error
+    AdhocCrossBorderWireTransfersPreprocessRequest:
+      required:
+      - chargeBearer
+      - payeeAccountDetails
+      - paymentScheduleType
+      - sourceAccountId
+      - transactionAmount
+      type: object
+      properties:
+        sourceAccountId:
+          type: string
+          description: "The source account identifier in encrypted format.Typically,\
+            \ this is not displayed to the customer."
+          example: 3255613852316f2b4d4d796c344e38756339654972776f663745446e6d4c32486f455a4165374a476858343d
+        payeeAccountDetails:
+          $ref: "#/components/schemas/PayeeAccountDetail"
+        transactionAmount:
+          type: number
+          description: The transaction amount
+          format: double
+          example: 4500.25
+        transactionCurrencyCode:
+          type: string
+          description: The currency code for the transaction amount in ISO 4217 format.
+          example: PLN
+        chargeBearer:
+          type: string
+          description: "Specifies which party(ies) will pay charges due for processing\
+            \ of the instruction. Please use /v1/utilities/referenceData/{chargeBearer}\
+            \ resource to get valid value of this field with description."
+          example: BENEFICIARY
+        paymentScheduleType:
+          type: string
+          description: "The payment schedule type. This is a reference data. Please\
+            \ use /v1/utilities/referenceData/{paymentScheduleType} resource to get\
+            \ valid value of this field."
+          example: IMMEDIATE
+        futureDatedTransaction:
+          $ref: "#/components/schemas/FutureDatedTransaction"
+        standingInstruction:
+          $ref: "#/components/schemas/StandingInstruction"
+        remarks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Remarks"
+    AdhocCrossBorderWireTransfersPreprocessResponse:
+      required:
+      - controlFlowId
+      - foreignExchangeRate
+      - transactionFee
+      type: object
+      properties:
+        controlFlowId:
+          type: string
+          description: Control flow Id
+          example: "12345678"
+        debitDetails:
+          $ref: "#/components/schemas/DebitDetails"
+        creditDetails:
+          $ref: "#/components/schemas/CreditDetails"
+        foreignExchangeRate:
+          type: number
+          description: 'The exchange rate that is applicable for the particular transfer. '
+          format: double
+          example: 1.8001
+        transactionFee:
+          type: number
+          description: The charges that is being charged by the source bank for doing
+            the transfer.
+          format: double
+          example: 25.25
+        feeCurrencyCode:
+          type: string
+          description: Fee currency code in ISO 4217 Format.
+          example: SGD
+    CrossBorderWireTransfersRequest:
+      required:
+      - controlFlowId
+      type: object
+      properties:
+        controlFlowId:
+          type: string
+          description: Control flow Id
+          example: 6e3774334f724a2b7947663653712f52456f524c41797038516a59347a437549564a77755676376e616a733d
+    CrossBorderWireTransfersResponse:
+      required:
+      - sourceAccountDetails
+      - transactionReferenceId
+      type: object
+      properties:
+        transactionReferenceId:
+          type: string
+

@@ -1,0 +1,956 @@
+openapi: 3.0.1
+info:
+  title: Accounts_Core_API
+  description: Consolidated API for account listing, details, and feature eligibility.
+  version: 1.0.0
+servers:
+- url: https://127.0.0.1/openapi/v1/accounts
+paths:
+  /:
+    get:
+      tags:
+      - Accounts_Account Financials_Account Details
+      summary: Retrieve Summary of All Accounts
+      description: "This API is used to return a summary of all accounts held by a\
+        \ customer. If a customer has multiple but similar accounts, e.g. two savings\
+        \ accounts, the accounts will be returned in the array accountGroupSummary.\
+        \ Important! For PSD2, only Credit card, Checking and Saving account are returned\
+        \ in the response."
+      operationId: AccountSummary
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - name: x-jws-signature
+        in: header
+        description: "This field is signature generated when partner sign API payload.This\
+          \ signature will be used to validate that the call is coming from a valid\
+          \ partner. This signature is a JWT token, which will be validated with partner’\
+          s JWK stored in DB"
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - $ref: "#/components/parameters/clientDetails"
+      - name: nextStartIndex
+        in: query
+        description: In some cases there is more data than what can be returned in
+          a single response. If there is additional data available a nextStartIndex
+          will be returned. Pass the nextStartIndex in your next request to retrieve
+          the next set of data.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: cardId
+        in: query
+        description: Tokenized card number.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountsGroupList"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr><tr><td>error</td><td>noTransactionsAllowed</td><td>No
+            transactions allowed on the card</td></tr><tr><td>error</td><td>onlyEppTransactionsAllowed</td><td>Only
+            EPP transaction is allowed</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><tr><td>error</td><td>resourceNotFound</td><td>Empty
+            resource/resource not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /{accountId}:
+    get:
+      tags:
+      - Accounts_Account Financials_Account Details
+      summary: Retrieve Account Details
+      description: "This API returns additional account details than what is provided\
+        \ in the summary of all accounts. To retrieve the details, simply pass the\
+        \ account id returned to you from the account summary. Important! For PSD2,\
+        \ only Credit card, Checking and Saving account are returned in the response."
+      operationId: AccountDetails
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: accountId
+        in: path
+        description: "The account identifier in encrypted format.Typically, this is\
+          \ not displayed to the customer"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDetailsResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>resourceNotFound</td><td>Empty
+            resource/resource not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /{accountId}/funds/sufficiencyCheck:
+    get:
+      tags:
+      - Accounts_Account Eligibility and Enrollment_Account Feature Eligibility
+      summary: This API is used to know if there is specific amount of funds is available
+        in the account
+      description: This API is used to know if there is specific amount of funds is
+        available in the account
+      operationId: SufficiencyOfFunds
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: x-jws-signature
+        in: header
+        description: "Signature generated when partner signs API payload. This signature\
+          \ will be used to validate that the call is coming from a valid partner.\
+          \ This signature is a JWT token, which will be validated with partner’s\
+          \ JWK stored in DB"
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: sufficiencyCheckAmount
+        in: query
+        description: Specifies amount to check account for sufficiency.
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: number
+          format: double
+      - name: currencyCode
+        in: query
+        description: Currency Code in ISO 4217 format
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SufficiencyOfFundsResponse"
+        "204":
+          description: No content
+          content: {}
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid Parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>The
+            request operation is not configured to access this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr><tr><td>error</td><td>invalidAccount</td><td>Account
+            is invalid</td></tr><tr><td>error</td><td>invalidAmount</td><td>Amount
+            is invalid</td></tr></tr><tr><td>error</td><td>invalidCurrency</td><td>Currency
+            is invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    AccountsGroupList:
+      type: object
+      properties:
+        accountGroupSummary:
+          type: array
+          description: Summarized list of every product group by the customer
+          items:
+            $ref: "#/components/schemas/AccountGroupSummary"
+        nextStartIndex:
+          type: string
+          description: In some cases there is more data than what can be returned
+            in a single response. If there is additional data available a nextStartIndex
+            will be returned. Pass the nextStartIndex in your next request to retrieve
+            the next set of data.
+          example: "11"
+    ErrorResponse:
+      required:
+      - code
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: Invalid - Request did not confirm to the specification and
+            was unprocessed and rejected. Please fix the value and try again
+          enum:
+          - error
+          - warn
+          - invalid
+          - fatal
+        code:
+          type: string
+          description: Error code which qualifies the error
+        details:
+          type: string
+          description: Human readable explanation specific to the occurrence of the
+            problem
+        location:
+          type: string
+          description: The name of the field that resulted in the error
+        moreInfo:
+          type: object
+          properties: {}
+          description: URI to human readable documentation of the error
+    AccountDetailsResponse:
+      type: object
+      properties:
+        creditCardAccount:
+          $ref: "#/components/schemas/CreditCardAccount"
+        readyCreditAccount:
+          $ref: "#/components/schemas/ReadyCreditAccount"
+        checkingAccount:
+          $ref: "#/components/schemas/CheckingAccount"
+        savingsAccount:
+          $ref: "#/components/schemas/SavingsAccount"
+        timeDepositAccount:
+          $ref: "#/components/schemas/TimeDepositAccount"
+        loanAccount:
+          $ref: "#/components/schemas/LoanAccount"
+        mutualFundAccount:
+          $ref: "#/components/schemas/MutualFundAccount"
+        securitiesBrokerageAccount:
+          $ref: "#/components/schemas/SecuritiesBrokerageAccount"
+        callDepositAccount:
+          $ref: "#/components/schemas/CallDepositAccount"
+        premiumDepositAccount:
+          $ref: "#/components/schemas/PremiumDepositAccount"
+        insuranceAccount:
+          $ref: "#/components/schemas/InsuranceAccount"
+        primaryCustomerIndicator:
+          type: string
+          description: "Customer is primary owner or not. P - Primary, S - Secondary."
+          example: P
+      description: Detailed account information
+    AccountGroupSummary:
+      required:
+      - accountGroup
+      - accounts
+      type: object
+      properties:
+        accountGroup:
+          type: string
+          description: "Account group is a classification of accounts according to\
+            \ their common characteristics. This is a reference data field. Please\
+            \ use /v1/apac/utilities/referenceData/{accountGroup} resource to get\
+            \ valid value of this field with description. You can use the field name\
+            \ as the referenceCode parameter to retrieve the values."
+          example: SAVINGS
+        accounts:
+          type: array
+          description: "Summarized list of each account type under a specific product\
+            \ group, held by customer"
+          items:
+            $ref: "#/components/schemas/AccountSummary"
+        insurancePolicies:
+          type: array
+          description: Summarized list of every insurance policy held by the customer.
+          items:
+            $ref: "#/components/schemas/InsurancePolicySummary"
+        totalCurrentBalance:
+          $ref: "#/components/schemas/GroupBalance"
+        totalAvailableBalance:
+          $ref: "#/components/schemas/GroupBalance"
+        totalOutstandingBalance:
+          $ref: "#/components/schemas/GroupBalance"
+    CreditCardAccount:
+      required:
+      - displayAccountNumber
+      type: object
+      properties:
+        productName:
+          type: string
+          description: The name of the product
+          example: Credit Card Account
+        productCode:
+          type: string
+          description: A unique code that identifies the product
+          example: 0500_VC901
+        displayAccountNumber:
+          type: string
+          description: A masked account number that can be displayed to the customer
+          example: XXXXXXXXXXXX2391
+        currencyCode:
+          type: string
+          description: The currency code of the account in ISO 4217 format
+          example: EUR
+        outstandingBalance:
+          type: number
+          description: The amount of money owed.
+          format: double
+          example: 10000.25
+        lastStatementBalance:
+          type: number
+          description: The balance on last statement date
+          format: double
+          example: 15000.25
+        lastStatementDate:
+          type: string
+          description: The date of the last statement in ISO 8601 date format YYYY-MM-DD
+          format: date
+          example: 2015-06-25
+        creditUsed:
+          type: number
+          description: The part of the credit limit already used
+          format: double
+          example: 3750.25
+        creditLimit:
+          type: number
+          description: The maximum amount of credit that extend to a customer
+          format: double
+          example: 50000.25
+        availableCredit:
+          type: number
+          description: The available credit
+          format: double
+          example: 3750.25
+        cashAdvanceLimit:
+          type: number
+          description: Some percentage of credit limit to withdraw cash
+          format: double
+          example: 15000.25
+        cashAdvanceAvailableAmount:
+          type: number
+          description: "Cash advance amount available. This will be same as the cash\
+            \ limit if there is no cash advance done. Otherwise, this will be the\
+            \ amount from the cashLimit minus the cash advance amount already used"
+          format: double
+          example: 15000.25
+        lastPaymentAmount:
+          type: number
+          description: The amount of the last payment made
+          format: double
+          example: 1500.25
+        lastPaymentDate:
+          type: string
+          description: The date of the last payment in ISO 8601 date format YYYY-MM-DD
+          format: date
+          example: 2015-06-12
+        minimumDueAmount:
+          type: number
+          description: Minimum due amount for a payment cycle
+          format: double
+          example: 1500.25
+        paymentDueDate:
+          type: string
+          description: The date of the next payment/payment due date in ISO 8601 date
+            format YYYY-MM-DD
+          format: date
+          example: 2015-06-12
+        availablePointBalance:
+          type: number
+          description: Available reward points on the credit card
+          format: double
+          example: 1500.25
+        holdAmount:
+          type: number
+          description: The amount of funds that were previously available but are
+            now blocked. It represents funds authorized for withdrawal but not yet
+            withdrawn. The hold amount is included in the ledger/book balance but
+            not in the available balance. It is included in interest
+          format: double
+          example: 1500.25
+        overpaymentAmount:
+          type: number
+          description: This is the amount customer paid on top of the statement due
+            amount
+          format: double
+          example: 1500.25
+        unbilledPurchaseAmount:
+          type: number
+          description: It is the total amount customer spend on purchases with credit
+            card post statement generation till current date.
+          format: double
+          example: 2600.11
+        unbilledPaymentAmount:
+          type: number
+          description: "It is the total amount customer paid for credit card but not\
+            \ billed in last statement i.e. payment made post statement date which\
+            \ are not considered in last statement, till current date."
+          format: double
+          example: 7500.25
+        privateLabelCreditCards:
+          $ref: "#/components/schemas/PrivateLabelCreditCards"
+        insuranceRecords:
+          $ref: "#/components/schemas/InsuranceRecords"
+    ReadyCreditAccount:
+      required:
+      - displayAccountNumber
+      type: object
+      properties:
+        productName:
+          type: string
+          description: The name of the product
+          example: Ready Credit Account
+        productCode:
+          type: string
+          description: A unique code that identifies the product
+          example: 0900_VC301
+        displayAccountNumber:
+          type: string
+          description: A masked account number that can be displayed to the customer
+          example: XXXXXX2364
+        currencyCode:
+          type: string
+          description: The currency code of the account in ISO 4217 format
+          example: EUR
+        outstandingBalance:
+          type: number
+          description: The amount of money owed
+          format: double
+          example: 10000.25
+        lastStatementBalance:
+          type: number
+          description: The balance on last statement date
+          format: double
+          example: 15000.25
+        lastStatementDate:
+          type: string
+          description: The date of the last statement in ISO 8601 date format YYYY-MM-DD
+          format: date
+          example: 2015-06-25
+        minimumDueAmount:
+          type: number
+          description: Minimum due amount for a payment cycle
+          format: double
+          example: 1500.25
+        creditLimit:
+          type: number
+          description: The maximum amount of credit that extend to a customer
+          format: double
+          example: 50000.25
+        availableCredit:
+          type: number
+          description: Available credit limit of ready credit account
+          format: double
+          example: 3750.5
+        cashAdvanceLimit:
+          type: number
+          description: Some percentage of credit limit to withdraw cash
+          format: double
+          example: 15000.25
+        cashAdvanceAvailableAmount:
+          type: number
+          description: The amount available under cash advance limit
+          format: double
+          example: 15000.25
+        lastPaymentAmount:
+          type: number
+          description: The amount of the last payment made
+          format: double
+          example: 1500.25
+        lastPaymentDate:
+          type: string
+          description: The date of the last payment in ISO 8601 date format YYYY-MM-DD
+          format: date
+          example: 2015-06-12
+        nextPaymentAmount:
+          type: number
+          description: The next payment amount due
+          format: double
+          example: 1500.25
+        nextPaymentDate:
+          type: string
+          description: The date on which the next payment starts in ISO 8601 date
+            format YYYY-MM-DD
+          format: date
+          example: 2015-06-12
+    CheckingAccount:
+      required:
+      - displayAccountNumber
+      type: object
+      properties:
+        productName:
+          type: string
+          description: The name of the product
+          example: Checking Account
+        productCode:
+          type: string
+          description: A unique code that identifies the product
+          example: 0100_VC300
+        displayAccountNumber:
+          type: string
+          description: A masked account number that can be displayed to the customer
+          example: XXXXXX2391
+        currentBalance:
+          type: number
+          description: The current balance including any pending or in progress deposits
+            and withdrawals
+          format: double
+          example: 10000.25
+        availableBalance:
+          type: number
+          description: The amount available  to withdraw or transfer immediately
+          format: double
+          example: 11000.25
+        overdraftLimit:
+          type: number
+          description: This allows a customer to overdraw their account up to a specific
+            amount
+          format: double
+          example: 15000.25
+        availableOverdraftLimit:
+          type: number
+          description: The amount available under over draft Limit amount
+          format: double
+          example: 13200.25
+        currencyCode:
+          type: string
+          description: The currency code of the account in ISO 4217 format
+          example: EUR
+        lastStatementDate:
+          type: string
+          description: The date of the last statement in ISO 8601 date format YYYY-MM-DD
+          format: date
+          example: 2015-06-25
+        holdAmount:
+          type: number
+          description: The amount of funds that were previously available but are
+            now blocked. It represents funds authorized for withdrawal but not yet
+            withdrawn. The hold amount is included in the ledger/book balance but
+            not in the available balance. It is included in interest
+          format: double
+          example: 12900.12
+        floatAmount:
+          type: number
+          description: The total amount of funds that have not yet been cleared through
+            the collection process for cheque and other instruments deposited to a
+            checking account. These funds are unavailable for withdrawal until they
+            are paid by the drawee bank.
+          format: double
+          example: 250000.25
+        totalInterestAmount:
+          type: number
+          description: Total interest amount on checking account.
+          format: double
+          example: 1212.12
+        openingDate:
+          type: string
+          description: Checking account opening date in ISO 8601 date format YYYY-MM-DD
+          format: date
+          example: 2007-12-01
+        bankCode:
+          type: string
+          description: Bank code of the account
+          example: "250"
+        branchCode:
+          type: string
+          description: Branch code of the account
+          example: "390"
+    SavingsAccount:
+      required:
+      - displayAccountNumber
+      type: object
+      properties:
+        productName:
+          type: string
+          description: The name of the product
+          example: Personal Saving Account
+        productCode:
+          type: string
+          description: A unique code that identifies the product
+          example: 0200_VC400
+        displayAccountNumber:
+          type: string
+          description: A masked account number that can be displayed to the customer
+          example: XXXXXX2391
+        currentBalance:
+          type: number
+          description: The current balance including any pending or in progress deposits
+            and withdrawals
+          format: double
+          example: 10000.25
+        availableBalance:
+          type: number
+          description: The amount available  to withdraw or transfer immediately
+          format: double
+          example: 15000.25
+        currencyCode:
+          type: string
+          description: The currency code of the account in ISO 4217 format
+          example: EUR
+        lastStatementDate:
+          type: string
+          description: The date of the last statement in ISO 8601 date format YYYY-MM-DD
+          format: date
+          example: 2015-06-25
+        holdAmount:
+          type: number
+          description: A portion of account balance unavailable for use for a set
+            period
+          format: double
+          example: 12900.12
+        openingDate:
+          type: string
+          description: Saving account opening date in ISO 8601 date format YYYY-MM-DD
+          format: date
+          example: 2007-12-01
+        floatAmount:
+          type: number
+          description: The total amount of funds that have not yet been cleared through
+            the collection process for cheque and other instruments deposited to a
+            savings account. These funds are unavailable for withdrawal until they
+            are paid by the drawee bank.
+          format: double
+          example: 250000.25
+        totalInterestAmount:
+          type: number
+          description: Total interest amount on the saving account
+          format: double
+          example: 1250.25
+        regularSavingsPlanOpenedDate:
+          type: string
+          description: Regular Savings Plan Opened Date ISO 8601 date format YYYY-MM-DD.
+          format: date
+          example: 2019-10-03
+        regularSavingsPlanTenor:
+          type: integer
+          description: Regular Savings Plan Tenor.
+          format: int32
+          example: 6
+        regularSavingsPlanInterestRate:
+          type: number
+          description: Interest Rate for Regular Savings Plan
+          format: double
+          example: 4.0
+        regularSavingsPlanBonusInterestRate:
+          type: number
+          description: Bonus Interest Rate for Regular Savings Plan
+          format: double
+          example: 3.99
+        bankCode:
+          type: string
+          description: Bank code of the account
+          example: "250"
+        branchCode:
+          type: string
+          description: Branch code of the account
+          example: "390"
+    TimeDepositAccount:
+      required:
+      - displayAccountNumber
+      type: object
+      properties:
+        productName:
+          type: string
+          description: The name of the product
+          example: Time Deposit Account
+        productCode:
+          type: string
+          description: A unique code that identifies the product
+          example: 0600_VC101
+        displayAccountNumber:
+          type: string
+          description: A masked account number that can be displayed to the customer
+          example: XXXXXX2391
+        depositPlacementNumber:
+          type: string
+          description: This is the booking/placement  number of deposit.
+          example: "11001123456"
+        originalPrincipalAmount:
+          type: number
+          description: The original principal amount when account opened.
+          format: double
+          example: 10000.25
+        currentPrincipalAmount:
+          type: number
+          description: The current principal amount value on deposit which is the
+            sum of original Principal and interest earned amount till date.
+          format: double
+          example: 18000.25
+        interestEffectiveDate:
+          type: string
+          description: This is the value date on which interest came into effect in
+            ISO 8601 date format YYYY-MM-DD
+          format: date
+          example: 2018-10-01
+        currencyCode:
+          type: string
+          description: The currency code of the account in ISO 4217 format
+          example: EUR
+        interestRate:
+          type: number
+          description: The rate of interest applicable for the time deposit
+          format: double
+          example: 0.0525
+        openingDate:
+          type: string
+          description: "The opening date of the time deposit, in ISO 8601 format YYYY-MM-DD"
+          format: date
+          example: 2015-12-01
+        maturityDate:
+          type: string
+          description: "The date when the time deposit will mature, in ISO 8601 format\
+            \ YYYY-MM-DD"
+          format: date
+          example: 2016-12-13
+        nextInterestPaymentDate:
+          type: string
+          description: "The date when interest will be paid by Citibank, in ISO8601\
+            \ format YYYY-MM-DD"
+          format: date
+          example: 2017-01-01
+        interestAmountDue:
+          type: number
+          description: The accrued interest amount which has not yet been paid by
+            Citibank
+          format: double
+          example: 100.25
+        renewalInstructions:
+          type: string
+          description: "The instructions for time deposit renewal. This is a reference\
+            \ data field. Please use /v1/apac/utilities/referenceData/{renewalInstructions}\
+            \ resource to get valid value of this field with description."
+          example: RENEW_PRINCIPAL_ONLY
+        tenorTerm:
+          type: integer
+          description: "The tenor term for the deposit, expressed as a whole number"
+          example: 12
+        tenorPeriod:
+          type: string
+          description: "The unit of the tenor term. This is a reference data field.\
+            \ Please use /v1/apac/utilities/referenceData/{tenorPeriod} resource to\
+            \ get valid value of this field with description."
+          example: MONTHS
+        baseCurrencyMaturityAmount:
+          type: number
+          description: The investment amount and accrued interest in base currency
+          format: double
+          example: 145071.25
+        maturityInterestAmount:
+          type: number
+          description: The accrued interest in base currency.
+          format: double
+          example: 5071.25
+        lastInterestPaymentAmount:
+          type: number
+          description: Last interest amount for the time deposit account
+          format: double
+          example: 107.25
+        periodicInterestRate:
+          type: number
+          description: The interest rate for the first period of the ladder time deposit
+          format: double
+          example: 2.8
+        interestPaymentCycle:
+          type: string
+          description: "The interest payment period. Possible values: 00=Monthly,\
+            \ 03=Quarterly, 04=Semi-annually"
+          format: string
+          example: Semi-annually
+    LoanAccount:
+      required:
+      - displayAccountNumber
+      type: object
+      properties:
+        productName:
+          type: string
+          description: The name of the product
+          example: Loan Account
+        productCode:
+          type: string
+          description: A unique code that identifies the product
+          example: 0800_VC601
+        displayAccountNumber:
+          type: string
+          description: A masked account number that can be displayed to the customer
+          example: XXXXXX2391
+        originalPrincipalAmount:
+          type: number
+          description: The amount borrowed
+          format: double
+          example: 200000.25
+        currentPrincipalAmount:
+          type: number
+          description: The remaining principal amount
+          format: double
+          example: 18000.25
+        availableCreditAmount:
+          type: number
+          description: Available Credit Amount on the loan account
+          format: double
+          example: 10000.25
+    SufficiencyOfFundsResponse:
+      type: object
+      properties:
+        sufficientFundsFlag:
+          type: boolean
+          description: Indicator to indicate if sufficient funds are present in the
+            account for deduction.
+          example: true
+  parameters:
+    Authorization:
+      name: Authorization
+      in: header
+      description: "The most recent Authorization token. This will have the format\
+        \ Bearer + {space} + {accessToken}. Example: Bearer KGNsaWVudF9pZDpjbGllbnRfc2VjcmV0KQ==."
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    uuid:
+      name: uuid
+      in: header
+      description: 128 bit random UUID generated uniquely for every request.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Accept:
+      name: Accept
+      in: header
+      description: Content-Type that are acceptable for the response.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    client_id:
+      name: client_id
+      in: header
+      description: Client ID generated during application registration.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    clientDetails:
+      name: clientDetails
+      in: header
+      description: "This field is used to capture device,browser and network information.\
+        \ Refer the developer portal for more information.These are the fields which\
+        \ will be passed as part of the header devicePrint,deviceTokenCookie,userIpAddress,userAgent,hardwareId,simId,deviceModel,deviceName,deviceOsName,deviceOsVersion,multitaskingSupportFlag,languageSupport,wifiMacAddress,cellTowerId,locationAreaCode,rsaApplicationKey,wapClientId,mobileCarrierCode,mobileCountryCode,osId,geoLongitude,geoLatitude,geoHorizontalAccuracy,geoAltitude,geoAltitudeAccuracy,geoSpeed,geoTimestamp,geoStatus,basicServiceSetId,signalStrength,wifiChannel,serviceSetId"
+      required: false
+      style: simple
+      explode: false
+      schema:
+        type: string
+  securitySchemes:
+    Client_id:
+      type: apiKey
+      description: pv52735
+      name: X-IBM-Client-Id
+      in: header
+    Client_id_Query:
+      type: apiKey
+      description: ""
+      name: client_id
+      in: query

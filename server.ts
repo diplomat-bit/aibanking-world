@@ -562,9 +562,9 @@ app.post("/api/v1/citi/accounts", async (req: Request, res: Response) => {
   }
 });
 
-app.all("/api/v1/citi/proxy/*", async (req: Request, res: Response) => {
+app.all("/api/v1/citi/proxy/:path*", async (req: Request, res: Response) => {
   const config = getAppConfig().citi;
-  const path = req.params[0];
+  const path = req.params.path;
   const url = `https://api.citi.com/${path}`;
   
   try {

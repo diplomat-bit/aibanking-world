@@ -1,14 +1,10 @@
 openapi: 3.0.1
 info:
-  title: AccountTransactionListingAndDetails_OpenAPI
-  description: This API is used to retrieve transactions details and history for all
-    accounts product.This API is also used to download the transaction details of
-    an account in different file formats.
+  title: Accounts_Transactions_API
+  description: Consolidated API for account transactions and financial details.
   version: 1.35.0
-  x-deployment-reference: "XP-O-CrossProdSvcs-DGL-EA,XP-O-CrossProdSvcs-DGL-EA-TW,XP-O-CrossProdSvcs-DGL-EA-EM"
-  x-linked-api: "CrossProductServices_Digital_Orchestration, TransactionDetailedView"
 servers:
-- url: "https://127.0.0.1/openapi/v1/accounts/{accountId}/transactions"
+- url: https://127.0.0.1/openapi/v1/accounts/{accountId}/transactions
 paths:
   /:
     get:
@@ -654,7 +650,7 @@ components:
         currencyCode:
           type: string
           description: This is the local currency code of transaction in ISO 4217
-            format
+          format
           example: EUR
         foreignTransactionAmount:
           type: number
@@ -800,489 +796,106 @@ components:
           description: Number of units received
           format: double
           example: 1100.0
-        balanceQuantity:
-          type: number
-          description: Number of units not received
-          format: double
-          example: 1255.0
-        stockMarketCode:
-          type: string
-          description: Trading market code for securities
-          example: NYSE
-        limitPrice:
-          type: number
-          description: minimum price for securities bond
-          format: double
-          example: 27.12
-        weightedTradePrice:
-          type: number
-          description: mean price of the securities bond
-          format: double
-          example: 27.12
-        isinCode:
-          type: string
-          description: ISIN stands for International Securities Identification Number.
-            These numbers are unique codes used to identify and track securities worldwide
-          example: US5949181045
-        referenceCurrencyCode:
-          type: string
-          description: The currency used for reference in bonds
-          example: EUR
-        investmentAmountInLocalCurrency:
-          type: number
-          description: InvestmentAmount In local currency
-          format: double
-          example: 5000.25
-        settlementAmountInSecurityCurrency:
-          type: number
-          description: The settlement amount for securities
-          format: double
-          example: 5000.25
-        settlementAmountInReferenceCurrency:
-          type: number
-          description: The settlement amount for securities for referency currency
-          format: double
-          example: 5000.25
-        investmentAmountInSecurityCurrency:
-          type: number
-          description: The investment amount for securities
-          format: double
-          example: 5000.25
-        settlementDate:
-          type: string
-          description: Date Of Settlement for Securities Bond
-          format: date
-          example: 2021-12-01
-        tradePrice:
-          type: number
-          description: price of  the trade prior to the current date
-          format: double
-          example: 20.32
     TransactionDetailedViewResponse:
-      required:
-      - paymentType
-      - transactionAmount
-      - transactionCurrencyCode
-      - transactionDate
       type: object
       properties:
-        displaySourceAccountNumber:
+        transactionReferenceId:
           type: string
-          description: A masked account number that can be displayed to the customer
-          example: XXXXXX2364
-        paymentType:
+          description: Reference Id to uniquely identify the transaction.This is applicable
+            for successful transactions.
+          example: BIMI51807310002051
+        transactionAmount:
+          type: number
+          description: Transaction amount in local currency.
+          format: double
+          example: 50.55
+        transactionDate:
           type: string
-          description: "The payment type.This is a reference data field. Please use\
-            \ /v1/utilities/referenceData/{paymentType} resource to get valid value\
-            \ of this field with description."
-          example: SWIFT_TRANSFER
+          description: "Transaction date in YYYY-MM-DD format value conforming to\
+            \ ISO 8601. This needs to be formatted in front-end for country/locale\
+            \ specific display purposes. This is the field used for default sorting,"
+          format: date
+          example: 2015-06-21
         transactionDescription:
           type: string
           description: "Transaction description from the merchant, POS or bank. If\
             \ there are foreign currency transactions on checking /saving account(s)\
             \ then description includes exchange rate, city and country."
           example: INTEREST PAYMENT
-        transactionAmount:
-          type: number
-          description: Transaction amount in account currency.
-          format: double
-          example: 50.55
-        transactionCurrencyCode:
+        transactionType:
           type: string
-          description: The currency code for the transaction amount in ISO 4217 format.
-          example: PLN
-        transactionDate:
-          type: string
-          description: "Transaction date in YYYY-MM-DD format value conforming to\
-            \ ISO 8601. This needs to be formatted in front-end for country/locale\
-            \ specific display purposes. This is the field used for default sorting,"
-          format: date
-          example: 2017-12-21
-        foreignTransactionAmount:
-          type: number
-          description: The transaction amount in the foreign account current
-          example: 50.55
-        foreignCurrencyCode:
-          type: string
-          description: The currency code for the foreign transaction amount in ISO
-            4217 format.
-          example: GBP
-        foreignExchangeRate:
-          type: number
-          description: The exchange rate at the time the foreign transaction was done
-          example: 0.2011
+          description: "The type of transaction. This is a reference data field. Please\
+            \ use /v1/utilities/referenceData/{transactionType} resource to get possible\
+            \ values of this field with descriptions."
+          example: DEBIT
         transactionStatus:
           type: string
           description: "The status of the transaction.  Applicable for credit cards\
             \ only.. This is a reference data field. Please use /v1/utilities/referenceData/{transactionStatus}\
             \ resource to get possible values of this field with descriptions."
-          example: NEW
+          example: BILLED
+        merchantName:
+          type: string
+          description: The merchant name with which this transaction was made with
+          example: "Alcott EU, Via Alberto Lionello, Roma"
+        merchantCategoryCode:
+          type: string
+          description: Merchant Category Code is a classification code that is a four-digit
+            number listed in ISO 18245
+          example: "5137"
+        transactionAuthorizationCode:
+          type: string
+          description: Transaction authorization code is a unique to a sales credit
+            card transaction to indicate that the sale has been authorized. This is
+            applicable only for pending transactions.
+          example: "987012"
+        transactionCode:
+          type: string
+          description: The transaction code
+          example: "260"
+        checkSerialNumber:
+          type: string
+          description: The check serial number. Applicable for checking accounts only
+          example: "89000125"
         transactionPostingDate:
           type: string
           description: Transaction posting date in YYYY-MM-DD format value conforming
-            to ISO 8601.
+            to ISO 8601. This needs to be formatted in front-end for country/locale
+            specific display purposes. This is the field used for default sorting
           format: date
-          example: 2019-02-12
-        customerName:
-          $ref: "#/components/schemas/CustomerName"
-        customerAddress:
-          $ref: "#/components/schemas/CustomerAddress"
-        beneficiaryBankDetails:
-          $ref: "#/components/schemas/BeneficiaryBankDetails"
-        customerMerchantReferenceDetails:
-          type: array
-          items:
-            $ref: "#/components/schemas/CustomerMerchantReferenceDetails"
-        remarks:
+          example: 2016-12-02
+        currencyCode:
           type: string
-          description: Payment notes. Free text from screen
-          example: Family expenses
-        paymentPriorityCode:
-          type: string
-          description: This code is used to indicate the priority payments
-          example: "5"
-        merchantCode:
-          type: string
-          description: The code to identify merchant
-          example: "300021"
-        merchantName:
-          type: string
-          description: The name of the merchant
-          example: КВАРТПЛАТА МОСКВА
-        transactionReversalDescription:
-          type: string
-          description: Transaction reversal description as provided by the returnee
-          example: Transaction Reversed with wrong Payee
-        originalTransactionDetails:
-          $ref: "#/components/schemas/OriginalTransactionDetails"
-        endToEndIdentification:
-          type: string
-          description: End to End Identification status
-          example: Pending
-        creditorDetails:
-          $ref: "#/components/schemas/CreditorDetails"
-        debtorDetails:
-          $ref: "#/components/schemas/DebtorDetails"
-        sourceBankName:
-          type: string
-          description: Name of the bank.
-          example: HSBC Bank
-        sourceBankCode:
-          type: string
-          description: The bank code of the payer account
-          example: "44525101"
-        clearingTimeStamp:
-          type: string
-          description: Clearing Date time as reported by the central bank in ISO 8601
-            date format YYYY-MM-DDTHH:MM:SS
-          format: dateTime
-          example: 2020-10-14T12:45:11
-        settlementTimeStamp:
-          type: string
-          description: Settlement Date time as reported by the central bank in ISO
-            8601 date format YYYY-MM-DDTHH:MM:SS
-          format: dateTime
-          example: 2020-10-15T13:45:30
-        centralBankTransactionReferenceId:
-          type: string
-          description: Transaction ID identifying the transaction across banks
-          example: A908808150725100F9wfDh4CFADBC375
-        originalCreditorDetails:
-          $ref: "#/components/schemas/OriginalCreditorDetails"
-        originalCreditAccountDetails:
-          $ref: "#/components/schemas/OriginalCreditAccountDetails"
-        originalDebtorName:
-          type: string
-          description: Original Debtor Name
-          example: John Smith
-        originalDebitAccountDetails:
-          $ref: "#/components/schemas/OriginalDebitAccountDetails"
-        transactionDebitFeeAmount:
+          description: This is the local currency code of transaction in ISO 4217
+          format
+          example: EUR
+        foreignTransactionAmount:
           type: number
-          description: Fees charged for the debit.
-          format: double
-          example: 15.15
-        bankMemberId:
-          type: string
-          description: Bank Member ID
-          example: "78346"
-        beneficiaryLegalName:
-          type: string
-          description: Legal Name of the Beneficiary
-          example: John Adam Smith
-        beneficiaryAddress:
-          type: array
-          items:
-            $ref: "#/components/schemas/BeneficiaryAddress"
-        beneficiaryTaxId:
-          type: string
-          description: Beneficiary Tax ID
-          example: 2302sda
-        creditorReferenceNo:
-          type: string
-          description: Creditor Reference No
-          example: Employee 254856
-        creditorIdentification:
-          type: string
-          description: Creditor  Identification
-          example: P2303030
-        creditorIdentificationType:
-          type: string
-          description: Creditor Identification Type
-          example: SupperAnnual
-        categoryPurposeCode:
-          type: string
-          description: Category Purpose Code
-          example: SALARY
-        correspondentAccountNumber:
-          type: string
-          description: Correspondent Account Number
-          example: "534646"
-        incomeCode:
-          type: string
-          description: Income Code
-          example: SALARY
-        sourceAccountNumber:
-          type: string
-          description: Source Account Number
-          example: "435454"
-        remitterName:
-          type: string
-          description: Remitter Name
-          example: Summer
-        remitterLegalName:
-          type: string
-          description: Remitter Legal Name
-          example: ООО Ромашка
-        remitterTaxId:
-          type: string
-          description: Remitter Tax Id
-          example: "7728240240"
-        beneficiaryTaxRegistrationCode:
-          type: string
-          description: Beneficiary Tax Registration Code
-          example: "454354"
-        creationDate:
-          type: string
-          description: calendar date when transaction entry was created or transaction
-            was initiated in YYYY-MM-DD format value conforming to ISO 8601.
-          format: date
-          example: 2022-01-17
-        effectiveTransferDate:
-          type: string
-          description: calendar date when transaction was completed in YYYY-MM-DD
-            format value conforming to ISO 8601.
-          format: date
-          example: 2022-01-18
-    CustomerName:
-      required:
-      - fullName
-      type: object
-      properties:
-        fullName:
-          type: string
-          description: Full name of the customer.
-          example: John Smith
-    CustomerAddress:
-      type: object
-      properties:
-        addressLine1:
-          type: string
-          description: Address line 1
-          example: "12"
-        addressLine2:
-          type: string
-          description: Address line 2
-          example: "24"
-        addressLine3:
-          type: string
-          description: Address line 3
-          example: "209"
-        addressLine4:
-          type: string
-          description: Address line 4
-          example: Warsaw
-        cityName:
-          type: string
-          description: City
-          example: Warsaw
-        state:
-          type: string
-          description: "State.This is a reference data field. Please use /v1/utilities/referenceData/{addressState}\
-            \ resource to get valid value of this field with description."
-          example: Mazowieckie
-        postalCode:
-          type: string
-          description: Postal/ZIP code
-          example: "345346"
-        provinceCode:
-          type: string
-          description: Province code
-          example: Mazowieckie
-        countryCode:
-          type: string
-          description: "ISO country code. This is a reference data field. Please use\
-            \ /v1/utilities/referenceData/{country} resource to get valid value of\
-            \ this field with description. You can use countryCode field name as the\
-            \ referenceCode parameter to retrieve the values."
-          example: PL
-    BeneficiaryBankDetails:
-      required:
-      - bankCode
-      - bankName
-      - displayAccountNumber
-      - fullName
-      type: object
-      properties:
-        fullName:
-          type: string
-          description: Name of the Beneficiary.
-          example: Albert Neigh
-        displayAccountNumber:
-          type: string
-          description: A masked account number that can be displayed to the customer
-          example: XXXXXX2391
-        bankName:
-          type: string
-          description: Name of the bank.
-          example: HSBC Bank
-        bankCode:
-          type: string
-          description: The bank code of the external payee account.
-          example: "44525101"
-        accountNumber:
-          type: string
-          description: Account number of the beneficiary.
-          example: "09125812364"
-    CustomerMerchantReferenceDetails:
-      required:
-      - customerMerchantReferenceCode
-      - customerMerchantReferenceDescription
-      type: object
-      properties:
-        customerMerchantReferenceCode:
-          type: string
-          description: Additional bill reference code.
-          example: EAMA
-        customerMerchantReferenceDescription:
-          type: string
-          description: The value associated with the corresponding additional Bill
-            Reference Code.
-          example: "1234123412345"
-    OriginalTransactionDetails:
-      type: object
-      properties:
-        paymentType:
-          type: string
-          description: "The payment type.This is a reference data field. Please use\
-            \ /v1/utilities/referenceData/{paymentType} resource to get valid value\
-            \ of this field with description."
-          example: SWIFT_TRANSFER
-        transactionDate:
-          type: string
-          description: "Transaction date in YYYY-MM-DD format value conforming to\
-            \ ISO 8601. This needs to be formatted in front-end for country/locale\
-            \ specific display purposes. This is the field used for default sorting,"
-          format: date
-        transactionAmount:
-          type: number
-          description: Transaction amount in account currency.
-          format: double
+          description: The transaction amount in the foreign currency
           example: 50.55
-        transactionCurrencyCode:
+        foreignCurrencyCode:
           type: string
-          description: The currency code for the foreign transaction amount in ISO
-            4217 format.
-          example: HKD
-        transactionStatus:
+          description: The foreign currency code of the transaction in ISO 4217 format
+          example: USD
+        foreignExchangeRate:
+          type: number
+          description: The exchange rate at the time the foreign transaction was done
+          example: 1.55
+        runningBalance:
+          type: number
+          description: The amount available to transact immediately
+          format: double
+          example: 1485.8
+        eligibleForEqualPaymentPlan:
           type: string
-          description: Transaction Status of the original transaction
-          example: Authorized
-        transactionReferenceNumber:
-          type: string
-          description: Transaction reference number of the original transaction
-          example: Pending
-        transactionRemarks:
-          type: string
-          description: Transaction Remarks of the original transaction
-          example: Money gone is gone
-        endToEndIdentification:
-          type: string
-          description: End to End Identification reference of the original transaction
-    CreditorDetails:
-      type: object
-      properties:
-        creditorProxyIdType:
-          type: string
-          description: Proxy ID Type used for the payee account identification
-          example: Mobile
-        creditorProxyIdValue:
-          type: string
-          description: Proxy ID value used for the payee account identification
-          example: +61-12385645
-    DebtorDetails:
-      type: object
-      properties:
-        debtorProxyIdType:
-          type: string
-          description: Proxy ID Type used for the payer account identification
-          example: Mobile
-        debtorProxyIdValue:
-          type: string
-          description: Proxy ID value used for the payer account identification
-          example: +61-7853123
-    OriginalCreditorDetails:
-      type: object
-      properties:
-        originalCreditorName:
-          type: string
-          description: Original Creditor Name
-          example: John Smith
-        originalCreditorProxyIdType:
-          type: string
-          description: Proxy ID Type used for the payee account identification
-          example: Mobile
-        originalCreditorProxyIdValue:
-          type: string
-          description: Proxy ID value used for the payee account identification
-          example: +61-12385645'
-    OriginalCreditAccountDetails:
-      type: object
-      properties:
-        displayAccountNumber:
-          type: string
-          description: A masked account number that can be displayed to the customer
-          example: XXXXXX2391
-        bankName:
-          type: string
-          description: Name of the bank.
-          example: HSBC Bank
-        bankCode:
-          type: string
-          description: The bank code of the payee account
-          example: "44525101"
-    OriginalDebitAccountDetails:
-      type: object
-      properties:
-        displayAccountNumber:
-          type: string
-          description: A masked account number that can be displayed to the customer
-          example: XXXXXX2391
-        bankName:
-          type: string
-          description: Name of the bank.
-          example: HSBC Bank
-        bankCode:
-          type: string
-          description: The bank code of the payee account
-          example: "44525101"
-    BeneficiaryAddress:
-      type: object
-      properties:
-        addressLine:
-          type: string
-          description: Address of the Beneficiary
-          example: Russia
+          description: "The EPP allowed indicator.This is a reference data field.\
+            \ Please use /v1/utilities/referenceData/{eligibleForEqualPaymentPlan}\
+            \ resource to get possible value of This field with description."
+          example: ELIGIBLE
+        additionalInformations:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdditionalInformations"
   parameters:
     Authorization:
       name: Authorization
@@ -1315,7 +928,7 @@ components:
     client_id:
       name: client_id
       in: header
-      description: client_id generated during consumer onboarding
+      description: Client ID generated during application registration.
       required: true
       style: simple
       explode: false
@@ -1328,28 +941,6 @@ components:
         \ Refer the developer portal for more information.These are the fields which\
         \ will be passed as part of the header devicePrint,deviceTokenCookie,userIpAddress,userAgent,hardwareId,simId,deviceModel,deviceName,deviceOsName,deviceOsVersion,multitaskingSupportFlag,languageSupport,wifiMacAddress,cellTowerId,locationAreaCode,rsaApplicationKey,wapClientId,mobileCarrierCode,mobileCountryCode,osId,geoLongitude,geoLatitude,geoHorizontalAccuracy,geoAltitude,geoAltitudeAccuracy,geoSpeed,geoTimestamp,geoStatus,basicServiceSetId,signalStrength,wifiChannel,serviceSetId"
       required: false
-      style: simple
-      explode: false
-      schema:
-        type: string
-    x-jws-signature:
-      name: x-jws-signature
-      in: header
-      description: "signature generated when partner sign API payload.This signature\
-        \ will be used to validate that the call is coming from a valid partner. This\
-        \ signature is a JWT token, which will be validated with partner's JWK stored\
-        \ in DB."
-      required: false
-      style: simple
-      explode: false
-      schema:
-        type: string
-    accountId:
-      name: accountId
-      in: path
-      description: "The account identifier in encrypted format.Typically, this is\
-        \ not displayed to the customer."
-      required: true
       style: simple
       explode: false
       schema:

@@ -1,0 +1,1413 @@
+openapi: 3.0.1
+info:
+  title: MoneyMovement_Transfers_Domestic
+  description: Consolidated API for Money Movement Domestic Transfers.
+  version: 1.0.0
+servers:
+- url: https://127.0.0.1/openapi/v1/moneyMovement/transfers/domestic
+paths:
+  /async:
+    post:
+      tags:
+      - Money Movement_Transfers
+      summary: Submit Multiple Transfers for Adhoc Payees
+      description: "This API is used for Citi Business customers to process multiple\
+        \ payment requests for Adhoc payees. In case authorization is required, this\
+        \ API will throw mfa Requried error. Prerequisite: Retrieve the applicable\
+        \ payment types, eligible source accounts from RetrievePaymentInitiationTransactionBulkSourceAccountAndPayeeEligibility\
+        \ API."
+      operationId: ExecutePaymentInitiationTransactionAdhocMultipleTransferAsync
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - name: x-jws-signature
+        in: header
+        description: "This field is signature generated when partner sign API payload.This\
+          \ signature will be used to validate that the call is coming from a valid\
+          \ partner. This signature is a JWT token, which will be validated with partner’\
+          s JWK stored in DB"
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - $ref: "#/components/parameters/clientDetails"
+      - name: nextStartIndex
+        in: query
+        description: In some cases there is more data than what can be returned in
+          a single response. If there is additional data available a nextStartIndex
+          will be returned. Pass the nextStartIndex in your next request to retrieve
+          the next set of data.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      requestBody:
+        description: ExecutePaymentInitiationTransactionAdhocMultipleTransferAsyncRequest
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecutePaymentInitiationTransactionAdhocMultipleTransferAsyncRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecutePaymentInitiationTransactionAdhocMultipleTransferAsyncResponse"
+        "201":
+          description: Created
+          content: {}
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>InvalidRequest</td><td>Missing
+            or invalid Parameters</td></tr><tr><td>error</td><td>InvalidRequest</td><td>Invalid
+            source account</td></tr><tr><td>error</td><td>InvalidRequest</td><td>Invalid
+            payee id</td></tr><tr><td>error</td><td>transactionDenied</td><td>Transaction
+            is denied</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>The
+            request operation is not configured to access this resource</td></tr><tr><td>error</td><td>mfaRequired</td><td>MFA
+            is required</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>resourceNotFound</td><td>Resource
+            not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: ExecutePaymentInitiationTransactionAdhocMultipleTransferAsyncRequest
+  /confirmation/async:
+    post:
+      tags:
+      - Money Movement_Transfers
+      summary: Confirm Multiple Transfers for Adhoc Payees
+      description: "This API is used for confirmation of multiple transfers to adhoc\
+        \ payees In case authorization is required, customer will be redirected to\
+        \ authorization page. Once authorization is confirmed as successful, this\
+        \ API will be used to trigger confirmation of multiple payments."
+      operationId: ExecutePaymentInitiationTransactionAdhocMultipleTransferConfirmationAsync
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: controlFllowId
+        in: query
+        description: This is control flow ID
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExecutePaymentInitiationTransactionAdhocMultipleTransferConfirmationAsyncResponse"
+        "201":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>Created</td><td>Created</td><td>Created</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "400":
+          description: <table><tr><td>error</td><td>InvalidRequest</td><td>Missing
+            or invalid Parameters</td></tr><tr><td>error</td><td>InvalidRequest</td><td>Invalid
+            source account</td></tr><tr><td>error</td><td>InvalidRequest</td><td>Invalid
+            payee id</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>The
+            request operation is not configured to access this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>resourceNotFound</td><td>Empty
+            resource/resource not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /payees/sourceAccounts:
+    get:
+      tags:
+      - Money Movement_Transfers_Inter Institution PTP Transfer
+      summary: Retrieve Destination Source Account - Internal Transfers
+      description: "This API is used to Return the valid combinations of the internal\
+        \ domestic transfer destination and source accounts. This information may\
+        \ be used to prepare a valid source list for a selected destination, or vice\
+        \ versa."
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: paymentType
+        in: query
+        description: "The payment type.This is a reference data field. Please use\
+          \ /v1/utilities/referenceData/{paymentType} resource to get valid value\
+          \ of this field with description."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: nextStartIndex
+        in: query
+        description: In some cases there is more data than what can be returned in
+          a single response. If there is additional data available a nextStartIndex
+          will be returned. Pass the nextStartIndex in your next request to retrieve
+          the next set of data.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalDomesticValidSourceDestinationAcccountsResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><td>error</td><td>resourceNotFound</td><td>Empty resource/resource
+            not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr></tr><table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /preprocess:
+    post:
+      tags:
+      - Money Movement_Transfers_Inter Institution PTP Transfer
+      summary: Create Internal Transfer
+      description: This API is used to create a new Internal domestic transfer and
+        verify that there are no errors. The response from this resource should be
+        used to construct a pre-confirmation page so the customer can review the transaction
+        before confirming.
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreprocessInternalFundTransferRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreprocessForInternalFundTransferResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr><tr><td>error</td><td>invalidPayee</td><td>Payee
+            is invalid</td></tr><tr><td>error</td><td>invalidSourceAccount</td><td>Source
+            account is invalid</td></tr><tr><td>error</td><td>invalidAccountCombination</td><td>Invalid
+            source and destination account combination</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>invalidFxDealReferenceNumber</td><td>Forex
+            deal reference is invalid</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr><tr><td>error</td><td>invalidPayee</td><td>Payee
+            is invalid</td></tr><tr><td>error</td><td>invalidSourceAccount</td><td>Source
+            account is invalid</td></tr><tr><td>error</td><td>invalidAccountCombination</td><td>Invalid
+            source and destination account combination</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>invalidFxDealReferenceNumber</td><td>Forex
+            deal reference is invalid</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>customerIsLockedForVda</td><td>Customer
+            is locked due to invalid attempts</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidCurrencyCode</td><td>Invalid
+            CCY for call deposit Payee</td></tr><table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: PreprocessFundTransferRequest
+  /:
+    post:
+      tags:
+      - Money Movement_Transfers_Inter Institution PTP Transfer
+      summary: Confirm Internal Transfer
+      description: "This API is used to confirm the internal domestic transfer. It\
+        \ should be called after successfully creating the internal transfer. If successful,\
+        \ it will return a confirmation number that should be displayed and stored."
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InternalDomesticTransferRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalDomesticTransferResponse"
+        "202":
+          description: "Accepted –The request has been accepted for processing , but\
+            \ has not been completed."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalDomesticTransferResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr><tr><td>error</td><td>preprocessFxRateExpired</td><td>Pre-process
+            forex rate is expired</td></tr><tr><td>error</td><td>transactionAmountBelowLimit</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>invalidControlFlowId</td><td>Control
+            flow ID is invalid</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>insufficientFund</td><td>Insufficient
+            fund</td></tr><tr><td>error</td><td>tempServiceSuspensionDueToNaturalCalamity</td><td>Temporary
+            service suspension due to natural calamities</td></tr><tr><td>error</td><td>transactionPendingReview</td><td>Transaction
+            pending under review</td></tr><tr><td>error</td><td>dailyTransactionAmountLimitReached</td><td>Maximum
+            daily transaction amount limit reached</td></tr><tr><td>error</td><td>transactionAmountLimitExceeded</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidAccountStatus</td><td>Account
+            status is invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr><tr><td>error</td><td>mfaRequired</td><td>MFA
+            is required</td></tr><tr><td>error</td><td>transactionDenied</td><td>Transaction
+            Denied</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>overLocalCustomerSpecifiedDailyLimitReached</td><td>The
+            overall local daily transaction amount limit for customer specific reached</td></tr><tr><td>error</td><td>overLocalDailyTransactionAmountLimitReached</td><td>The
+            overall local daily transaction amount limit reached</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr><tr><td>error</td><td>MonthlyTransactionAmountLimitReached</td><td>Exceed
+            monthly non-designated transfer limit</td></tr><tr><td>error</td><td>OverdraftAmountExceeds</td><td>OD
+            amount is greater than book balance</td></tr><tr><td>error</td><td>TerminalNotRegistered</td><td>Terminal
+            is not registered</td></tr><tr><td>error</td><td>preprocessFxRateExpired</td><td>Pre-process
+            forex rate is expired</td></tr><tr><td>error</td><td>transactionAmountBelowLimit</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>invalidControlFlowId</td><td>Control
+            flow ID is invalid</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>insufficientFund</td><td>Insufficient
+            fund</td></tr><tr><td>error</td><td>tempServiceSuspensionDueToNaturalCalamity</td><td>Temporary
+            service suspension due to natural calamities</td></tr><tr><td>error</td><td>transactionPendingReview</td><td>Transaction
+            pending under review</td></tr><tr><td>error</td><td>dailyTransactionAmountLimitReached</td><td>Maximum
+            daily transaction amount limit reached</td></tr><tr><td>error</td><td>transactionAmountLimitExceeded</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidAccountStatus</td><td>Account
+            status is invalid</td></tr><tr><td>error</td><td>invalidDateRange</td><td>Date
+            range is invalid</td></tr><tr><td>error</td><td>invalidPaymentDate</td><td>Invalid
+            payment date</td></tr><tr><td>error</td><td>duplicatetransaction</td><td>Transaction
+            is duplicate within the period</td></tr><tr><td>error</td><td>transactionMissedCutoffTime</td><td>The
+            transaction has missed cutoff time</td></tr><tr><td>error</td><td>transactionRejectedDueToSdnHit</td><td>Transaction
+            is rejected due to SDN hit</td></tr><tr><td>error</td><td>customerSpecifiedDailyLimitReached</td><td>Maximum
+            customer specific daily transaction amount limit reached</td></tr><tr><td>error</td><td>invalidBeneficiaryName</td><td>Beneficiary
+            name is invalid</td></tr><tr><td>error</td><td>fXTransactionsNotAllowedForMinors</td><td>FX
+            Transactions Not Allowed For Minors</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: InternalDomesticTransferRequest
+  /preprocess/adhocWithPayeeCreation:
+    post:
+      tags:
+      - Money Movement_Transfers_Inter Institution PTP Transfer
+      summary: "This API allows customer to make adhoc transfers within CITIBANK for\
+        \ a same country.This handle the exchange rate, fees and charges. This API\
+        \ also allows to send request to enroll the payee in registered list of payees,\
+        \ however  registration of payee in  payee list takes place in  subsequent\
+        \ confirmation APIs."
+      description: "This API allows customer to make adhoc transfers within CITIBANK\
+        \ for a same country.This handle the exchange rate, fees and charges. This\
+        \ API also allows to send request to enroll the payee in registered list of\
+        \ payees, however  registration of payee in  payee list takes place in  subsequent\
+        \ confirmation APIs. "
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdhocInternalDmstcTransferPreprocessWithAddPayeeRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdhocInternalDmstcTransferPreprocessWithAddPayeeResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr><tr><td>error</td><td>invalidAccount</td><td>Account
+            is invalid</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>invalidPayee</td><td>Payee
+            is invalid</td></tr><tr><td>error</td><td>invalidSourceAccount</td><td>Source
+            account is invalid</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidDestinationAccount</td><td>Destination
+            account is invalid</td></tr><tr><td>error</td><td>paymentScheduleNotAllowed</td><td>Selected
+            Payment Schedule cannot be supported for this payment</td></tr><tr><td>error</td><td>futureDatedTransferRestricted</td><td>Future
+            Date transfers are not allowed for selected source account</td></tr><tr><td>error</td><td>sourceAccountOrCardInactiveOrNotFound</td><td>Source
+            account is inactive or not found in records</td></tr><tr><td>error</td><td>customerIsLockedForVda</td><td>Customer
+            is locked due to invalid attempts</td></tr><tr><td>error</td><td>failedToGetFXRate</td><td>Unable
+            to fetch FX Rate</td></tr><tr><td>error</td><td>crossCurrencySpotLimitExceeded</td><td>The
+            transaction amount is higher than allowed spot limit for cross currency
+            transfers</td></tr><tr><td>error</td><td>transactionFeeHigherThanTransactionAmount</td><td>The
+            transaction fee is higher than transaction amount</td></tr><tr><td>error</td><td>invalidAccountCombination</td><td>Invalid
+            source and destination account combination</td></tr><tr><td>error</td><td>failedToGetFXRate</td><td>Unable
+            to fetch FX Rate</td></tr><tr><td>error</td><td>invalidPaymentDate</td><td>Payment
+            date entered is invalid</td></tr><tr><td>error</td><td>pastDatedTransactionNotAllowed</td><td>Past
+            dated transaction are not allowed</td></tr><tr><td>error</td><td>invalidTransactionCurrency</td><td>Transaction
+            currency is invalid</td></tr><table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: AdhocInternalDmstcTransferPreprocessWithAddPayeeRequest
+  /preprocess/adhoc:
+    post:
+      tags:
+      - Money Movement_Transfers_Inter Institution PTP Transfer
+      summary: Create Adhoc Internal Transfer
+      description: This API is used to create a new Internal Domestic transfer to
+        an adhoc destination and verifies there are no errors. The destination does
+        not need to be in a payee list. The response from this resource should be
+        used to construct a pre-confirmation page so the customer can review the transaction
+        before confirming.
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdhocInternalDmstcTransferPreprocessRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdhocInternalDmstcTransferPreprocessResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr></tr><tr><td>error</td><td>invalidAccount</td><td>Account
+            is invalid</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>invalidPayee</td><td>Payee
+            is invalid</td></tr><tr><td>error</td><td>invalidSourceAccount</td><td>Source
+            account is invalid</td></tr><tr><td>error</td><td>invalidAccountCombination</td><td>Invalid
+            source and destination account combination</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: AdhocInternalDmstcTransferPreprocessRequest
+  /confirmation:
+    post:
+      tags:
+      - Money Movement_Transfers_Inter Institution PTP Transfer
+      summary: This API is to confirm internal domestic transfers post Multi Factor
+        Authentication.
+      description: This API is to confirm internal domestic transfers post Multi Factor
+        Authentication.
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InternalDomesticTransferConfirmationRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalDomesticTransferConfirmationResponse"
+        "202":
+          description: "Accepted –The request has been accepted for processing , but\
+            \ has not been completed."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalDomesticTransferConfirmationResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /preprocess:
+    post:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: Create External Transfer
+      description: This API is used to Create a new external domestic transfer and
+        verify that there are no errors. The response from this resource should be
+        used to construct a pre-confirmation page so the customer can review the transaction
+        before confirming.
+      operationId: ExternalDomesticTransferPreprocess
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreprocessFundTransferRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreprocessForFundTransferResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr><tr><td>error</td><td>invalidPayee</td><td>Payee
+            is invalid</td></tr><tr><td>error</td><td>invalidSourceAccount</td><td>Source
+            account is invalid</td></tr><tr><td>error</td><td>invalidAccountCombination</td><td>Invalid
+            source and destination account combination</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>invalidFxDealReferenceNumber</td><td>Forex
+            deal reference is invalid</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidPaymentMethod</td><td>Payment
+            method is invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>resourceNotFound</td><td>Empty
+            resource/resource not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr><tr><td>error</td><td>invalidPayee</td><td>Payee
+            is invalid</td></tr><tr><td>error</td><td>invalidSourceAccount</td><td>Source
+            account is invalid</td></tr><tr><td>error</td><td>invalidAccountCombination</td><td>Invalid
+            source and destination account combination</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>invalidFxDealReferenceNumber</td><td>Forex
+            deal reference is invalid</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidPaymentMethod</td><td>Payment
+            method is invalid</td></tr><tr><td>error</td><td>amountNotEligibleForFASTTransfers</td><td>Selected
+            amount cannot do FAST transfers</td></tr><tr><td>error</td><td>transactionFeesIsHigherThanTransactionAmount</td><td>Transaction
+            fees is higher than transaction amount</td></tr><tr><td>error</td><td>invalidPaymentDate</td><td>Payment
+            data enetered is invalid</td></tr><tr><td>error</td><td>futureDatedTransferRestricted</td><td>Future
+            Date transfers are not allowed for selected source account</td></tr><tr><td>error</td><td>pastDatedTransactionNotAllowed</td><td>Past
+            dated transaction are not allowed</td></tr><tr><td>error</td><td>crossCurrencyTransfersNotAllowed</td><td>Cross
+            currency transfers not allowed for this payment</td></tr><tr><td>error</td><td>crossCurrencySpotLimitExceeded</td><td>Transaction
+            amount is higher than allowed spot limit for cross currency transfers</td></tr><tr><td>error</td><td>sourceAccountOrCardInactiveOrNotFound</td><td>Source
+            account is inactive or not found in records</td></tr><tr><td>error</td><td>paymentScheduleNotAllowed</td><td>Selected
+            Payment Schedule cannot be supported for this payment</td></tr><tr><td>error</td><td>failedToGetFXRate</td><td>Unable
+            to fetch FX Rate</td></tr><tr><td>error</td><td>invalidPayeeBankCode</td><td>Payee
+            Bank code is invalid</td></tr><tr><td>error</td><td>ineligiblePayeeAccount</td><td>Transfer
+            to this payee account is not allowed.This account may be invalid or restricted</tr><tr><td>error</td><td>FPSNotAvailable</td><td>FPS
+            is not available</td></tr></tr><tr><td>error</td><td>FASTNotSupportedByDestinationBank</td><td>Destination
+            bank doesn't support FAST</td></tr></td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr>><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: PreprocessFundTransferRequest
+  /adhocWithPayeeCreation:
+    post:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: "This API is used to do preprocess activities for externalDomesticTransfer.\
+        \ This handle the exchange rate, fees and charges.This API also allows to\
+        \ send request to enroll the payee in registered list of payees, however registration\
+        \ of payee in payee list takes place in subsequent confirmation APIs."
+      description: "This API is used to do preprocess activities for externalDomesticTransfer.\
+        \ This handle the exchange rate, fees and charges.This API also allows to\
+        \ send request to enroll the payee in registered list of payees, however registration\
+        \ of payee in payee list takes place in subsequent confirmation APIs."
+      operationId: AdhocExternalDomesticPreprocessWithAddPayee
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdhocExtDmstcTransferPreprocessWithAddPayeeRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdhocExtDmstcTransferPreprocessWithAddPayeeResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>resourceNotFound</td><td>Empty
+            resource/resource not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr><tr><td>error</td><td>invalidSourceAccount</td><td>Source
+            account is invalid</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>invalidFxDealReferenceNumber</td><td>Forex
+            deal reference is invalid</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidPaymentMethod</td><td>Payment
+            method is invalid</td></tr><tr><td>error</td><td>invalidTransferCurrencyIndicator</td><td>Transaction
+            currency indicator is invalid</td></tr><tr><td>error</td><td>invalidPaymentDate</td><td>Invalid
+            payment date</td></tr><tr><td>error</td><td>amountNotEligibleForFASTTransfers</td><td>Selected
+            amount cannot do FAST transfers</td></tr><tr><td>error</td><td>transactionFeesIsHigherThanTransactionAmount</td><td>Transaction
+            fees is higher than transaction amount</td></tr><tr><td>error</td><td>invalidPaymentDate</td><td>Payment
+            data enetered is invalid</td></tr><tr><td>error</td><td>futureDatedTransferRestricted</td><td>Future
+            Date transfers are not allowed for selected source account</td></tr><tr><td>error</td><td>pastDatedTransactionNotAllowed</td><td>Past
+            dated transaction are not allowed</td></tr><tr><td>error</td><td>crossCurrencyTransfersNotAllowed</td><td>Cross
+            currency transfers not allowed for this payment</td></tr><tr><td>error</td><td>crossCurrencySpotLimitExceeded</td><td>Transaction
+            amount is higher than allowed spot limit for cross currency transfers</td></tr><tr><td>error</td><td>sourceAccountOrCardInactiveOrNotFound</td><td>Source
+            account is inactive or not found in records</td></tr><tr><td>error</td><td>paymentScheduleNotAllowed</td><td>Selected
+            Payment Schedule cannot be supported for this payment</td></tr><tr><td>error</td><td>failedToGetFXRate</td><td>Unable
+            to fetch FX Rate</td></tr><tr><td>error</td><td>regulatorNotAvailable</td><td>The
+            country regulator seems offline or not available</td></tr><tr><td>error</td><td>accountVerificationFailed</td><td>This
+            account or requested payment verification seems failed at regulator</td></tr><tr><td>error</td><td>InvalidGovernmentID</td><td>Government
+            ID is not available</td></tr><tr><td>error</td><td>invalidAccountCombination</td><td>Invalid
+            source and destination account combination</td></tr><tr><td>error</td><td>FPSNotAvailable</td><td>FPS
+            is not available</td></tr></tr><tr><td>error</td><td>FASTNotSupportedByDestinationBank</td><td>Destination
+            bank doesn't support FAST</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: AdhocExtDmstcTransferPreprocessWithAddPayeeRequest
+  /payees/sourceAccounts:
+    get:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: Retrieve Destination Source Account - External Transfers
+      description: "This API is used to return the valid combinations of external\
+        \ domestic transfer destination and source accounts. This information may\
+        \ be used to prepare a valid source list for a selected destination, or vice\
+        \ versa."
+      operationId: ExternalDomesticAccountPayeeEligibility
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: paymentType
+        in: query
+        description: "The payment type.This is a reference data field. Please use\
+          \ /v1/utilities/referenceData/{paymentType} resource to get valid value\
+          \ of this field with description."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: nextStartIndex
+        in: query
+        description: In some cases there is more data than what can be returned in
+          a single response. If there is additional data available a nextStartIndex
+          will be returned. Pass the nextStartIndex in your next request to retrieve
+          the next set of data.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtDmstcValidPayeeDestAcctsResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>resourceNotFound</td><td>Empty
+            resource/resource not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /preprocess/adhoc:
+    post:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: Create Adhoc External Transfer
+      description: This API is used to create a new External Domestic transfer to
+        an adhoc destination and verifies there are no errors. The destination does
+        not need to be in a payee list. The response from this resource should be
+        used to construct a pre-confirmation page so the customer can review the transaction
+        before confirming.
+      operationId: AdhocExternalDomesticTransferPreprocess
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdhocExtDmstcTransferPreprocessRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdhocExtDmstcTransferPreprocessResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>resourceNotFound</td><td>Empty
+            resource/resource not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr><tr><td>error</td><td>invalidSourceAccount</td><td>Source
+            account is invalid</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>invalidFxDealReferenceNumber</td><td>Forex
+            deal reference is invalid</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidPaymentMethod</td><td>Payment
+            method is invalid</td></tr><tr><td>error</td><td>invalidTransferCurrencyIndicator</td><td>Transaction
+            currency indicator is invalid</td></tr><table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: AdhocExtDmstcTransferPreprocessRequest
+  /:
+    post:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: Confirm External Transfer
+      description: "This API is used to confirm the external domestic transfer. It\
+        \ should be called after successfully creating the external domestic transfer.\
+        \ If successful, it will return a confirmation number that should be displayed\
+        \ and stored."
+      operationId: ExtermalDomesticTransfer
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExternalDomesticTransferRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExternalDomesticTransferResponse"
+        "202":
+          description: "Accepted –The request has been accepted for processing, but\
+            \ has not been completed."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExternalDomesticTransferResponse"
+        "206":
+          description: Partial Success.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExternalDomesticTransferResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr><tr><td>error</td><td>preprocessFxRateExpired</td><td>Preprocess
+            forex rate is expired</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>invalidControlFlowId</td><td>Control
+            flow ID is invalid</td></tr><tr><td>error</td><td>invalidBankCode</td><td>Bank
+            code is invalid</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>insufficientFund</td><td>Insufficient
+            fund</td></tr><tr><td>error</td><td>tempServiceSuspensionDueToNaturalCalamity</td><td>Temporary
+            service suspension due to natural calamities</td></tr><tr><td>error</td><td>transactionPendingReview</td><td>Transaction
+            is pending under review</td></tr><tr><td>error</td><td>dailyTransactionAmountLimitReached</td><td>Maximum
+            daily transaction amount limit reached</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidAccountStatus</td><td>Account
+            status is invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr><tr><td>error</td><td>mfaRequired</td><td>MFA
+            is required</td></tr><tr><td>error</td><td>transactionDenied</td><td>Transaction
+            Denied</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>resourceNotFound</td><td>Empty
+            resource or resource not found</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationsFailed</td><td>Business
+            validations failed</td></tr><tr><td>error</td><td>fastTransactionAmountLimitReached</td><td>Fast
+            transaction limit is reached</td></tr><tr><td>error</td><td>preprocessFxRateExpired</td><td>Pre-process
+            forex rate is expired</td></tr><tr><td>error</td><td>transactionAmountBelowMinimum</td><td>Transaction
+            amount below minimum amount</td></tr><tr><td>error</td><td>invalidControlFlowId</td><td>Control
+            flow ID is invalid</td></tr><tr><td>error</td><td>invalidBankCode</td><td>Bank
+            code is invalid</td></tr><tr><td>error</td><td>invalidTransactionAmount</td><td>Transaction
+            amount is invalid</td></tr><tr><td>error</td><td>insufficientFund</td><td>Insufficient
+            fund</td></tr><tr><td>error</td><td>tempServiceSuspensionDueToNaturalCalamity</td><td>Temporary
+            service suspension due to natural calamities</td></tr><tr><td>error</td><td>transactionPendingReview</td><td>Transaction
+            is pending under review</td></tr><tr><td>error</td><td>dailyTransactionAmountLimitReached</td><td>Maximum
+            daily transaction amount limit reached</td></tr><tr><td>error</td><td>transactionAmountExceedsMaximum</td><td>Allowed
+            transaction amount limit for this transaction exceeded</td></tr><tr><td>error</td><td>invalidAccountStatus</td><td>Account
+            status is invalid</td></tr><tr><td>error</td><td>invalidDateRange</td><td>Date
+            range is invalid</td></tr><tr><td>error</td><td>invalidPaymentDate</td><td>Invalid
+            payment date</td></tr><tr><td>error</td><td>duplicatetransaction</td><td>Transaction
+            is duplicate within the period</td></tr><tr><td>error</td><td>transactionMissedCutoffTime</td><td>The
+            transaction has missed cutoff time</td></tr><tr><td>error</td><td>transactionRejectedDueToSdnHit</td><td>Transaction
+            is rejected due to SDN hit</td></tr><tr><td>error</td><td>regulatorNotAvailable</td><td>The
+            country regulator seems offline or not available</td></tr><tr><td>error</td><td>monthlyTransactionAmountLimitReached</td><td>Exceed
+            monthly non-designated transfer limit</td></tr><tr><td>error</td><td>overdraftAmountExceeds</td><td>OD
+            amount is greater than book balance</td></tr><tr><td>error</td><td>terminalNotRegistered</td><td>Terminal
+            is not registered</td></tr><tr><td>error</td><td>networkTransferLimitExceeds</td><td>Network
+            transfer limit is exceeded</td></tr><tr><td>error</td><td>customerSpecifiedDailyLimitReached</td><td>Maximum
+            customer specific daily transaction amount limit reached</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+      x-codegen-request-body-name: ExternalDomesticTransferRequest
+  /confirmation:
+    post:
+      tags:
+      - Money Movement_Transfers_Wire Transfer
+      summary: Confirm External Transfer
+      description: "This API is used to confirm the external domestic transfer. It\
+        \ should be called after successfully creating the external domestic transfer.\
+        \ If successful, it will return a confirmation number that should be displayed\
+        \ and stored."
+      parameters:
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExternalDomesticTransferConfirmationRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExternalDomesticTransferConfirmationResponse"
+        "202":
+          description: "Accepted –The request has been accepted for processing, but\
+            \ has not been completed."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExternalDomesticTransferConfirmationResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credential is missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>Access
+            is not configured for this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    PayeeAccountDetail:
+      required:
+      - payeeAccountNumber
+      - payeeCurrencyCode
+      type: object
+      properties:
+        payeeAccountNumber:
+          type: string
+          description: This is beneficiairyAccountNumber
+          example: "558877744"
+        accountIbanFlag:
+          type: boolean
+          description: This field is to indicate whether the account number is IBAN
+            or not
+          example: true
+        payeeName:
+          type: string
+          description: This is payeeName
+          example: MarkJacobs
+        payeeNickName:
+          type: string
+          description: "This is beneficiaryNickName,applicable for UK"
+          example: Mark
+        payeeCurrencyCode:
+          type: string
+          description: The currency code of the destination account in ISO 4217 format
+          example: SGD
+        payeeAddress:
+          $ref: "#/components/schemas/PayeeAddress"
+        payeeBankDetails:
+          $ref: "#/components/schemas/PayeeBankDetails"
+    PayeeBankDetails:
+      required:
+      - swiftCode
+      type: object
+      properties:
+        swiftCode:
+          type: string
+          description: This field is to indicate the SWIFT code(Society for Worldwide
+            Interbank Financial Telecommunication code). An internationally-recognized
+            identification code for banks around the world.
+          example: HKBAAU2SBNE
+        payeeBankAddress:
+          $ref: "#/components/schemas/PayeeBankAddress"
+        payeeBankName:
+          type: string
+          description: Name of the bank
+          example: HSBC Bank
+    Sepa:
+      required:
+      - sourceAccountId
+      - transactionCurrencyCode
+      type: object
+      properties:
+        sourceAccountId:
+          type: string
+          description: "The source account identifier in encrypted format.Typically,\
+            \ this is not displayed to the customer."
+          example: 3255613852316f2b4d4d796c344e38756339654972776f663745446e6d4c32486f455a4165374a476858343d
+        transactionCurrencyCode:
+          type: string
+          description: "This is an indicator if transfer is to be done in source or\
+            \ destination currency, this is CVT field transferCurrencyIndicator"
+          example: PLN
+        transactionAmount:
+          type: number
+          description: Transaction Amount
+          format: double
+          example: 4500.21
+        payeeAccountInfo:
+          $ref: "#/components/schemas/PayeeAccountInfo"
+        remarks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Remarks"
+    PayeeAccountInfo:
+      required:
+      - payeeAccountNumber
+      - payeeName
+      type: object
+      properties:
+        payeeAccountNumber:
+          type: string
+          description: The account number of the destination account
+          example: "251212582364"
+        payeeName:
+          type: string
+          description: Name of the payee
+          example: MARC
+        payeeNickName:
+          type: string
+          description: The nick name of the payee assigned by the customer.
+          example: MarcJ
+        payeeAddress:
+          $ref: "#/components/schemas/PayeeAddress"
+        payeeBankMiniDetail:
+          $ref: "#/components/schemas/PayeeBankMiniDetail"
+    PayeeBankMiniDetail:
+      required:
+      - swiftCode
+      type: object
+      properties:
+        swiftCode:
+          type: string
+          description: This field is to indicate the SWIFT code(Society for Worldwide
+            Interbank Financial Telecommunication code). An internationally-recognized
+            identification code for banks around the world.
+          example: HKBAAU2SBNE
+        countryName:
+          type: string
+          description: "This field is to indicate the name of the country. This is\
+            \ a reference data field. Please use /v1/utilities/referenceData/{countryName}\
+            \ resource to get valid value of this field with description."
+          example: SINGAPORE
+        payeeBankName:
+          type: string
+          description: Name of the bank
+          example: HSBC Bank
+    ExecutePaymentInitiationTransactionAdhocMultipleTransferAsyncResponse:
+      type: object
+      properties:
+        transactionStatus:
+          type: string
+          description: This is transaction status
+        citiBundleId:
+          type: string
+          description: This is bundle/ bulk id of the transactions from Citi
+        totalTransactionCount:
+          type: string
+          description: This is total number of transactions
+        controlFlowId:
+          type: string
+          description: This is control flow id
+    ExecutePaymentInitiationTransactionAdhocMultipleTransferConfirmationAsyncResponse:
+      type: object
+      properties:
+        transactionStatus:
+          type: string
+          description: This is transaction status
+        bundleId:
+          type: string
+          description: This is bundle/ bulk id of the transactions from TPP
+        citiBundleId:
+          type: string
+          description: This is bundle/ bulk id of the transactions from CITI
+        totalTransactionCount:
+          type: string
+          description: This is total number of transactions
+    ErrorResponse:
+      required:
+      - code
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: Invalid - Request did not confirm to the specification and
+            was unprocessed and rejected. Please fix the value and try again
+          enum:
+          - error
+          - warn
+          - invalid
+          - fatal
+        code:
+          type: string
+          description: Error code which qualifies the error
+        details:
+          type: string
+          description: Human readable explanation specific to the occurrence of the
+            problem
+        location:
+          type: string
+          description: The name of the field that resulted in the error
+        moreInfo:
+          type: object
+          properties: {}
+          description: URI to human readable documentation of the error
+
+  parameters:
+    # ... (parameters from all three files)

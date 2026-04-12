@@ -1,0 +1,1246 @@
+openapi: 3.0.1
+info:
+  title: Onboarding_EMEA
+  description: Consolidated API for Onboarding EMEA
+  version: 1.0.0
+servers:
+- url: https://127.0.0.1/openapi/v1/emea/onboarding
+paths:
+  /applications:
+    post:
+      tags:
+      - Acquisitions_Application Management_Application Submission and Tracking
+      summary: Create Unsecured Credit Application
+      description: This API pre-populates an application for card and banking products
+        with the applicant's details. The API will then return an application id that
+        can be used to perform actions on the application and check status.
+      parameters:
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/countryCode"
+      - $ref: "#/components/parameters/businessCode"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/Accept-Language"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        description: Input Data to submit the application.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationAddRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationAddResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>singleProductAllowed</td><td>Only
+            1 product allowed in the request</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid Parameters</td></tr><tr><td>invalid</td><td>productAgreementExpired</td><td>Agreement
+            duration of this product is expired</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td><td>More
+            Info</td></tr><tr><td>invalid</td><td>accessNotConfigured</td><td>The
+            request operation is not configured to access this resource</td><td>Channel/Country/Business
+            provided in the request is not supported currently</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+      x-codegen-request-body-name: ApplicationAddRequest
+  /applications/{applicationId}:
+    get:
+      tags:
+      - Acquisitions_Application Management_Application Submission and Tracking
+      summary: Retrieve Application
+      description: This API is used to retrieve the existing application details
+      parameters:
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/countryCode"
+      - $ref: "#/components/parameters/businessCode"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/Accept-Language"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: applicationId
+        in: path
+        description: Unique ID created for an Application. This is retuned back in
+          ApplicationAdd response and the same should be passed here.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: withOfferFlag
+        in: query
+        description: 'Offer flag indicates whether you want to include the offer details
+          in the response.If true it will return the offer details in the response '
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: controlFlowId
+        in: query
+        description: Control flow id is used to control the flow for subsequent requests
+          in the session.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationInquiryResponse"
+        "400":
+          description: <table><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid Parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td><td>More
+            Info</td></tr><tr><td>invalid</td><td>accessNotConfigured</td><td>The
+            request operation is not configured to access this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>invalidApplication</td><td>Application
+            not found or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+    put:
+      tags:
+      - Acquisitions_Application Management_Application Submission and Tracking
+      summary: Update Unsecured Credit Application
+      description: This API returns the application details and status for a specific
+        application id after a successful Multi Factor Authentication.
+      parameters:
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/countryCode"
+      - $ref: "#/components/parameters/businessCode"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/Accept-Language"
+      - $ref: "#/components/parameters/Content-Type"
+      - name: x-jws-signature
+        in: header
+        description: "This field is signature generated when partner sign API payload.This\
+          \ signature will be used to validate that the call is coming from a valid\
+          \ partner. This signature is a JWT token, which will be validated with partner’\
+          s JWK stored in DB"
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - $ref: "#/components/parameters/clientDetails"
+      - name: applicationId
+        in: path
+        description: Unique ID created for an Application. This is retuned back in
+          ApplicationAdd response and the same should be passed here.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Input Data to submit the application.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationUpdateRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationUpdateResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid Parameters</td></tr><tr><td>invalid</td><td>productAgreementExpired</td><td>Agreement
+            duration of this product is expired</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td><td>More
+            Info</td></tr><tr><td>invalid</td><td>accessNotConfigured</td><td>The
+            request operation is not configured to access this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>invalidApplication</td><td>Application
+            not found or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+      x-codegen-request-body-name: ApplicationUpdateRequest
+  /applications/{applicationId}/submission:
+    post:
+      tags:
+      - Acquisitions_Application Management_Application Submission and Tracking
+      summary: Application Submission
+      description: This API submits the created application to host systems for a
+        particular application id.
+      parameters:
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/countryCode"
+      - $ref: "#/components/parameters/businessCode"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/Accept-Language"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: applicationId
+        in: path
+        description: Unique ID created for an Application. This is retuned back in
+          ApplicationAdd response and the same should be passed here.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: 'Final Submit Request '
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinalSubmitRequest"
+        required: true
+      responses:
+        "200":
+          description: The request has succeeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinalSubmitResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid Parameters</td></tr><tr><td>error</td><td>applicationRejected</td><td>Application
+            not successful</td></tr><tr><td>invalid</td><td>productAgreementExpired</td><td>Agreement
+            duration of this product is expired</td></tr><tr><td>error</td><td>reAuthorizationRequired</td><td>Re
+            Authorization is required </td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "401":
+          description: <table><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td><td>More
+            Info</td></tr><tr><td>invalid</td><td>accessNotConfigured</td><td>The
+            request operation is not configured to access this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>invalidApplication</td><td>Application
+            not found or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "500":
+          description: <table><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+      x-codegen-request-body-name: FinalSubmitRequest
+  /applications/{applicationId}/status:
+    get:
+      tags:
+      - Acquisitions_Application Management_Application Submission and Tracking
+      summary: Retrieve Application Status
+      description: This API is used to retrieve the application status.
+      parameters:
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/countryCode"
+      - $ref: "#/components/parameters/businessCode"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/Accept-Language"
+      - $ref: "#/components/parameters/clientDetails"
+      - name: applicationId
+        in: path
+        description: Unique identifier of an application
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: withOfferFlag
+        in: query
+        description: 'Offer flag indicates whether you want to include the offer details
+          in the response.If true it will return the offer details in the response '
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationStatusResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid Parameters</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td><td>More
+            Info</td></tr><tr><td>invalid</td><td>accessNotConfigured</td><td>The
+            request operation is not configured to access this resource</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "404":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>invalidApplication</td><td>Application
+            not found or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+  /applications/{applicationId}/offerAcceptance:
+    post:
+      tags:
+      - Acquisitions_Application Management_Application Decisioning
+      summary: Create Assisted Offer Acceptance Request.
+      description: "This API allows the applicant to choose/accept from the different\
+        \ offers which were offered by bank after his IPA eligibility check in the\
+        \ assisted channel. These offers include cross sell offers,suggested offers\
+        \ or counter offers. offers."
+      parameters:
+      - $ref: "#/components/parameters/client_id"
+      - $ref: "#/components/parameters/Authorization"
+      - $ref: "#/components/parameters/uuid"
+      - $ref: "#/components/parameters/Accept"
+      - $ref: "#/components/parameters/Content-Type"
+      - $ref: "#/components/parameters/clientDetails"
+      requestBody:
+        description: Input Data to accept the product offered in the application.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OfferAcceptanceRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfferAcceptanceResponse"
+        "400":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>invalidRequest</td><td>Missing
+            or invalid Parameters</td></tr><tr><td>error</td><td>invalidProductCode</td><td>invalid
+            ProductCode</td></tr><tr><td>error</td><td>applicationRejected</td><td>applicationRejected</td></tr><tr><td>error</td><td>incorrectProductSelected</td><td>incorrect
+            Product Selected</td></tr><tr><td>error</td><td>exceededApprovedCreditLimit</td><td>You
+            cannot choose higher credit limit from what is offered during IPA.</td></tr><tr><td>invalid</td><td>productAgreementExpired</td><td>Agreement
+            duration of this product is expired</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "401":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization
+            credentials are missing or invalid</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "403":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>invalid</td><td>accessNotConfigured</td><td>The
+            request operation is not configured to access this resource</td></tr><tr><td>error</td><td>invalidRequestSequence</td><td>Request
+            sequence is not correct.</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+        "500":
+          description: <table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The
+            request failed due to an internal error</td></tr></table>
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorList"
+      x-codegen-request-body-name: OfferAcceptanceRequest
+components:
+  schemas:
+    ApplicationAddRequest:
+      type: object
+      properties:
+        authenticationReferenceNumber:
+          type: string
+          description: Authentication reference number associated with the authentication
+            request.
+        productDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        auditDetails:
+          $ref: "#/components/schemas/AuditDetails"
+        referralTracking:
+          $ref: "#/components/schemas/ReferralTracking"
+        applicant:
+          $ref: "#/components/schemas/Applicant"
+    ReferralTracking:
+      type: object
+      properties:
+        referralOrganizationId:
+          type: string
+          description: "Unique identifier that refers to source of the Media organization\
+            \  from where the URL is redirected. Example can be  Facebook,Google,Yandex\
+            \ etc."
+          example: Google
+        trackingId:
+          type: string
+          description: "Unique tracking reference number for third party redirection/internal\
+            \ redirection.Example would be  ecid for UAE, yclid for Russia Yandex,\
+            \ icid for internal Citibank site."
+          example: icid
+        searchQuery:
+          type: string
+          description: The string with which the applicant searched for the information
+            in different search engines like Google/Yandex etc.
+        searchResultRanking:
+          type: string
+          description: Search result display position.
+    Product:
+      type: object
+      properties:
+        productCategory:
+          type: string
+          description: Product category of the product
+        productCode:
+          type: string
+          description: A unique code that identifies the product.
+        sourceCode:
+          type: string
+          description: A source code to identify the product
+        organization:
+          type: string
+          description: Card issuing organization name
+        logo:
+          type: string
+          description: Product logo to identify the product
+        marketingCampaignOfferDetails:
+          $ref: "#/components/schemas/MarketingCampaignOfferDetails"
+    MarketingCampaignOfferDetails:
+      type: object
+      properties:
+        campaignId:
+          type: string
+          description: Campaign Id of the marketing campaign
+        waveId:
+          type: string
+          description: Wave id  associated with the marketing wave
+        offerId:
+          type: string
+          description: Unique offer id associated with the offer
+    AuditDetails:
+      type: object
+      properties:
+        userIpAddress:
+          type: string
+          description: IP Address of the system from which applicant is opening an
+            account. If captured by Vendor then can be sent else can be ignored.
+    Applicant:
+      type: object
+      properties:
+        ocr:
+          $ref: "#/components/schemas/Ocr"
+        motherMaidenName:
+          type: string
+          description: Mothers maiden name
+        customerId:
+          type: string
+          description: Customer ID is a key associated with a specific entity or person
+            Citi does business or has a relationship
+        name:
+          $ref: "#/components/schemas/Name"
+        demographics:
+          $ref: "#/components/schemas/Demographics"
+        address:
+          type: array
+          items:
+            $ref: "#/components/schemas/Address"
+        email:
+          type: array
+          items:
+            $ref: "#/components/schemas/Email"
+        phone:
+          type: array
+          items:
+            $ref: "#/components/schemas/Phone"
+        contactPreference:
+          $ref: "#/components/schemas/ContactPreference"
+        contactConsent:
+          $ref: "#/components/schemas/ContactConsent"
+        financialInformation:
+          $ref: "#/components/schemas/FinancialInformation"
+        education:
+          $ref: "#/components/schemas/Education"
+        employmentInformation:
+          $ref: "#/components/schemas/EmploymentInformation"
+        identificationDocumentDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/IdentificationDocumentDetails"
+        additionalData:
+          $ref: "#/components/schemas/AdditionalData"
+        referencePerson:
+          $ref: "#/components/schemas/ReferencePerson"
+        consentDetails:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConsentDetails"
+        selfDeclaration:
+          $ref: "#/components/schemas/SelfDeclaration"
+        kycInformation:
+          $ref: "#/components/schemas/KycInformation"
+        externalLoansAndLines:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExternalLoansAndLines"
+    Ocr:
+      type: object
+      properties:
+        ocrReferenceNumber:
+          type: string
+          description: OCR (Optical Character Recognition) Reference number
+    Name:
+      type: object
+      properties:
+        salutation:
+          type: string
+          description: "Salutation. This a reference data field. Please use /utilities/referenceData/{salutation}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrieve the values."
+        givenName:
+          type: string
+          description: Given/first name of the applicant
+        middleName:
+          type: string
+          description: Middle name of the applicant
+        surname:
+          type: string
+          description: Surname/last name of the applicant
+        previousGivenName:
+          type: string
+          description: Applicant's previous first name.
+        previousMiddleName:
+          type: string
+          description: Applicant's previous middle name.
+        previousSurname:
+          type: string
+          description: Applicant's previous Surname.
+        localEnglishGivenName:
+          type: string
+          description: Local Given Name in English
+        localEnglishSurname:
+          type: string
+          description: Local surname in English
+        aliasName:
+          type: string
+          description: Alias name of the applicant
+        suffix:
+          type: string
+          description: Generational qualifier that follow a person given name. It
+            is used to explicitly identify the named individual within the same family.
+        saluteBy:
+          type: string
+          description: "Contains value with which applicant like to be addressed.\
+            \ This a reference data field. Please use /utilities/referenceData/{saluteBy}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrieve the values."
+    Demographics:
+      type: object
+      properties:
+        gender:
+          type: string
+          description: "Gender/sex. This a reference data field. Please use /utilities/referenceData/{gender}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrieve the values."
+        dateOfBirth:
+          type: string
+          description: Applicants date of birth in  ISO 8601 date format YYYY-MM-DD
+          format: date
+        placeOfBirth:
+          type: string
+          description: Applicants place of birth
+        countryOfBirth:
+          type: string
+          description: "Applicants Country of birth. This a reference data field.\
+            \ Please use /utilities/referenceData/{countryName} resource to get valid\
+            \ values of this field with descriptions. You can use the fieldname as\
+            \ the referenceCode parameter to retrieve the values."
+        religion:
+          type: string
+          description: Name of religion applicant belong to
+        nationality:
+          type: string
+          description: "Applicants nationality. This a reference data field. Please\
+            \ use /utilities/referenceData/{countryName} resource to get valid values\
+            \ of this field with descriptions. You can use the fieldname as the referenceCode\
+            \ parameter to retrieve the values."
+        domicileCountryCode:
+          type: string
+          description: "Domicile country code. This a reference data field. Please\
+            \ use /utilities/referenceData/{countryName} resource to get valid values\
+            \ of this field with descriptions. You can use the fieldname as the referenceCode\
+            \ parameter to retrieve the values."
+        permanentResidencyCountryCode:
+          type: string
+          description: "Permanent residency country code. This a reference data field.\
+            \ Please use /utilities/referenceData/{countryName} resource to get valid\
+            \ values of this field with descriptions. You can use the fieldname as\
+            \ the referenceCode parameter to retrieve the values."
+        maritalStatus:
+          type: string
+          description: "Marital status. This a reference data field. Please use /utilities/referenceData/{martialStatusCode}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrieve the values."
+        residencyStatus:
+          type: string
+          description: "Indicate status of residence. This a reference data field.\
+            \ Please use /utilities/referenceData/{residenceStatus} resource to get\
+            \ valid values of this field with descriptions. You can use the fieldname\
+            \ as the referenceCode parameter to retrieve the values."
+        residenceType:
+          type: string
+          description: "Type of Residence. This a reference data field. Please use\
+            \ /utilities/referenceData/{residenceType} resource to get valid values\
+            \ of this field with descriptions. You can use the fieldname as the referenceCode\
+            \ parameter to retrieve the values."
+        residenceIndicator:
+          type: string
+          description: "Applicants permanent residency status.Ex:NON-RESIDENT.This\
+            \ a reference data field. Please use /utilities/referenceData/{permenentIndicator}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrieve the values."
+        residenceDurationInYears:
+          type: number
+          description: Applicants Residence duration in the current address in years
+        residenceDurationInMonths:
+          type: number
+          description: Applicants Residence duration in the current address in months
+        taxDomicileCountryCode:
+          type: string
+          description: "Tax domicile country code. This a reference data field. Please\
+            \ use /utilities/referenceData/{countryName} resource to get valid values\
+            \ of this field with descriptions. You can use the fieldname as the referenceCode\
+            \ parameter to retrieve the values."
+        spokenLanguageCode:
+          type: string
+          description: "Code for spoken language of applicant. This a reference data\
+            \ field. Please use /utilities/referenceData/{spokenLanguageCode} resource\
+            \ to get valid values of this field with descriptions. You can use the\
+            \ fieldname as the referenceCode parameter to retrieve the values."
+        correspondenceLanguageCode:
+          type: string
+          description: "Code for correspondence language of applicant.This a reference\
+            \ data field. Please use /utilities/referenceData/{correspondenceLanguageCode}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrieve the values."
+        creditBureauHistoryCode:
+          type: string
+          description: Unique Customer identifier provided to the applicant by the
+            bureau. In case Russia it is issued by CKKI (Central Catalogue of Credit
+            Histories – division of Russia Central Bank).
+        otherTaxDomicileCountryCodes:
+          type: array
+          description: "Other tax domicile country codes.This field can store upto\
+            \ 5 country codes.This a reference data field. Please use /utilities/referenceData/{countryName}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrieve the values."
+          items:
+            type: string
+        usCitizenshipFlag:
+          type: boolean
+          description: Flag to indicate if the applicant is an USA Citizen.Valid values
+            are true and false.
+          example: true
+        usTaxResidentFlag:
+          type: boolean
+          description: Flag to indicate if the applicant is a US Tax resident.Valid
+            values are true and false.
+          example: true
+    Address:
+      type: object
+      properties:
+        addressType:
+          type: string
+          description: "Type of address. This a reference data field. Please use /utilities/referenceData/{addressType}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrieve the values."
+        addressLine1:
+          type: string
+          description: Address line 1
+        addressLine2:
+          type: string
+          description: Address line 2
+        addressLine3:
+          type: string
+          description: Address line 3
+        addressLine4:
+          type: string
+          description: Address line 4
+        cityName:
+          type: string
+          description: City
+        state:
+          type: string
+          description: State.
+        postalCode:
+          type: string
+          description: Postal/ZIP code
+        provinceCode:
+          type: string
+          description: "Province code.This a reference data field. Please use /utilities/referenceData/{provinceCode}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrieve the values."
+        countryCode:
+          type: string
+          description: "ISO country code. This a reference data field. Please use\
+            \ /utilities/referenceData/{countryName} resource to get valid values\
+            \ of this field with descriptions. You can use the fieldname as the referenceCode\
+            \ parameter to retrieve the values."
+        okToMail:
+          type: string
+          description: "Applicants consent for receiving mail. Valid values: true\
+            \ and false"
+        coverageAreaCode:
+          type: string
+          description: Coverage area code.
+        kladrCode:
+          type: string
+          description: High level kladr code. KLADR refers to Russian postal address
+          database.
+        structuredAddress:
+          $ref: "#/components/schemas/StructuredAddress"
+    StructuredAddress:
+      type: object
+      properties:
+        unitNumber:
+          type: string
+          description: Unit Number
+        floorNumber:
+          type: string
+          description: Floor Number
+        blockNumber:
+          type: string
+          description: Block Number
+        buildingName:
+          type: string
+          description: Building Name
+        estateName:
+          type: string
+          description: Estate Name
+        streetNumber:
+          type: string
+          description: Street Number
+        streetName:
+          type: string
+          description: Street Name
+        streetType:
+          type: string
+          description: Street Type
+        town:
+          type: string
+          description: Town
+    Email:
+      type: object
+      properties:
+        emailType:
+          type: string
+          description: "The type of email.  This is a reference data field. Please\
+            \ use /v1/apac/utilities/referenceData/{emailType} resource to get valid\
+            \ value of this field with description. You can use emailType as the referenceCode\
+            \ parameter to retrieve the values "
+          example: PERSONAL
+        emailAddress:
+          type: string
+    ErrorList:
+      type: object
+      properties:
+        errors:
+          type: array
+          description: List of one or more errors
+          items:
+            $ref: "#/components/schemas/ErrorResponse"
+    ErrorResponse:
+      required:
+      - code
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+          description: Invalid - Request did not confirm to the specification and
+            was unprocessed and rejected. Please fix the value and try again
+          enum:
+          - error
+          - warn
+          - invalid
+          - fatal
+        code:
+          type: string
+          description: Error code which qualifies the error
+        details:
+          type: string
+          description: Human readable explanation specific to the occurrence of the
+            problem
+        location:
+          type: string
+          description: The name of the field that resulted in the error
+        moreInfo:
+          type: object
+          properties: {}
+          description: URI to human readable documentation of the error
+    ApplicationAddResponse:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          description: Unique identifier for the application
+          example: "120123"
+    ApplicationInquiryResponse:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          description: Unique identifier for the application
+          example: "120123"
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: SUBMITTED
+    ApplicationUpdateRequest:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          description: Unique identifier for the application
+          example: "120123"
+        applicant:
+          $ref: "#/components/schemas/Applicant"
+    ApplicationUpdateResponse:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          description: Unique identifier for the application
+          example: "120123"
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: SUBMITTED
+    FinalSubmitRequest:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          description: Unique identifier for the application
+          example: "120123"
+    FinalSubmitResponse:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          description: Unique identifier for the application
+          example: "120123"
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: SUBMITTED
+    OfferAcceptanceRequest:
+      type: object
+      properties:
+        offerProductConfirmation:
+          type: array
+          items:
+            $ref: "#/components/schemas/OfferProductConfirmation"
+        requestedProductConfirmation:
+          type: array
+          items:
+            $ref: "#/components/schemas/RequestedProductConfirmation"
+        controlFlowId:
+          type: string
+          description: Control flow id is used to control the flow for subsequent
+            requests in the session..
+          example: "2345"
+    OfferAcceptanceResponse:
+      type: object
+      properties:
+        loanDetails:
+          type: array
+          description: Loan details associated with the loan specific selection by
+            the applicant
+          items:
+            $ref: "#/components/schemas/LoanDetail"
+    LoanDetail:
+      type: object
+      properties:
+        accountNumber:
+          type: string
+          description: Account number associated with the loan
+          example: "122123123"
+        interBankOfferedRate:
+          type: number
+          description: The Interbank Offered Rates are daily reference rates based
+            on the averaged interest rates at which banks offer to lend unsecured
+            funds to other banks in wholesale money markets.This rate will fluctuate
+            every day
+          format: double
+          example: 12.2
+        loanIndexRate:
+          type: number
+          description: An interest rate charged on loans to borrowers that is calculated
+            by taking the sum of a benchmark index interest rate and a specified margin
+          format: double
+          example: 12.2
+    OfferProductConfirmation:
+      type: object
+      properties:
+        productCode:
+          type: string
+          description: A unique code that identifies the product
+        sourceCode:
+          type: string
+          description: A source code to identify the product
+        organization:
+          type: string
+          description: Card issuing Organisation code
+        offerProductAcceptedFlag:
+          type: boolean
+          description: "Flag to indicate a counter offer selected by an applicant.\
+            \ Valid values: True or False"
+        offerSequenceId:
+          type: string
+          description: Unique offer sequence id to identify an offer
+        productProgramIndicator:
+          type: string
+          description: "Product program indicator.This a reference data field. Please\
+            \ use /utilities/referenceData/{productProgramIndicator} resource to get\
+            \ valid values of this field with descriptions. You can use the fieldname\
+            \ as the referenceCode parameter to retrieve the values."
+        creditSpecificSelection:
+          $ref: "#/components/schemas/CreditSpecificSelection"
+        loanSpecificSelection:
+          $ref: "#/components/schemas/LoanSpecificSelection"
+    CreditSpecificSelection:
+      type: object
+      properties:
+        requestCreditShield:
+          type: boolean
+          description: "Insurance enrollment for outstanding balance on the card.\
+            \ Valid values: True or False"
+        embossName:
+          type: string
+          description: Name to be embossed on card
+        billingAddress:
+          type: string
+          description: Billing address of applicant
+        cardDeliveryAddress:
+          type: string
+          description: Card delivery address of applicant
+        pinDeliveryAddress:
+          type: string
+          description: Card pin delivery address of applicant
+        requestedCreditLimit:
+          type: number
+          description: Credit limit accepted by customer
+          format: double
+        atmRequiredFlag:
+          type: boolean
+          description: "Option to get ATM card along with product. Valid values: True\
+            \ or False"
+        chequeBookRequiredFlag:
+          type: boolean
+          description: "Option to get cheque book along with product. Valid values:\
+            \ True or False"
+        creditLimitIncreaseIndicator:
+          type: boolean
+          description: "Option  to increase credit limit. Valid values: True or False"
+    LoanSpecificSelection:
+      type: object
+      properties:
+        loanAmount:
+          type: number
+          description: Loan Amount accepted by customer
+          format: double
+        tenor:
+          type: string
+          description: "Tenure of loan. This a reference data field. Please use /utilities/referenceData/{tenure}\
+            \ resource to get valid values of this field with descriptions. You can\
+            \ use the fieldname as the referenceCode parameter to retrive the values."
+        interestRate:
+          type: number
+          description: Interest rate of the loan
+          format: double
+        billingAddress:
+          type: string
+          description: Billing address of applicant
+        annualPercentageRate:
+          type: number
+          description: Applicable Annual Percentage Rate on the product
+          format: double
+        handlingFeeAmount:
+          type: number
+          description: Handling fee for processing of the loan
+          format: double
+        monthlyFeeAmount:
+          type: number
+          description: Monthly fee amount is the amount paid by customer as the fixed
+            processing charges every month
+          format: double
+        insurancePremiumAmount:
+          type: number
+          description: Insurance premium amount is the i insurance amount paid by
+            customer for availing the insurance product against the loan
+          format: double
+        totalLoanAmountWithoutSpouseConsent:
+          type: number
+          description: Total loan amount with out the spouse consent
+          format: double
+        pricingPlanId:
+          type: string
+          description: Pricing plan id is the unique id of pricing plan which is selected
+            by customer
+        handlingFeePercentage:
+          type: string
+          description: Handling fee percentage for the loan processing. Its represented
+            as the percentage of the loan amount
+        grossLoanAmount:
+          type: number
+          description: Gross Loan Amount availed by the customer
+          format: double
+        totalCostOfCreditWithoutInsurance:
+          type: number
+          description: "Total Cost of credit without the insurance amount for the\
+            \ tenor selected. Formula for calculating the value: (InstallmtAmtWithoutIns\
+            \ + Monthly Fee) * Tenor - Loan Amount"
+          format: double
+        totalCostOfCreditWithInsurance:
+          type: number
+          description: "Total Cost of credit with the insurance amount for the tenor\
+            \ selected. Formula for calculating the value: (InstallmtAmtWithIns +Monthly\
+            \ Fee) * Tenor - Loan Amount"
+          format: double
+        installmentAmount:
+          type: number
+          description: Installment amount to be paid. This is calculated without the
+            insurance amount.Insurance option is applicable for EMEA countries
+          format: double
+        installmentAmountWithInsurance:
+          type: number
+          description: Installment amount to be paid. This is calculated with the
+            insurance amount.Insurance option is applicable for EMEA countries
+          format: double
+        interBankOfferedRate:
+          type: number
+          description: The Interbank Offered Rates are daily reference rates based
+            on the averaged interest rates at which banks offer to lend unsecured
+            funds to other banks in wholesale money markets.This rate will fluctuate
+            every day
+          format: double
+    RequestedProductConfirmation:
+      type: object
+      properties:
+        productCode:
+          type: string
+          description: A unique code that identifies the product
+        sourceCode:
+          type: string
+          description: A source code to identify the product
+        organization:
+          type: string
+          description: Card issuing Organisation code
+        productProgramIndicator:
+          type: string
+          description: "Product program indicator.This a reference data field. Please\
+            \ use /utilities/referenceData/{productProgramIndicator} resource to get\
+            \ valid values of this field with descriptions. You can use the fieldname\
+            \ as the referenceCode parameter to retrieve the values."
+        creditSpecificSelection:
+          $ref: "#/components/schemas/CreditSpecificSelection"
+        loanSpecificSelection:
+          $ref: "#/components/schemas/LoanSpecificSelection"
+  parameters:
+    client_id:
+      name: client_id
+      in: header
+      description: The client ID you received while Onboarding with Citi to use these
+        API's. This will be generated and shared while registring in the developer
+        portal.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Authorization:
+      name: Authorization
+      in: header
+      description: The Authorization Token
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    countryCode:
+      name: countryCode
+      in: header
+      description: Country code in 2 character ISO 3166 format.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    businessCode:
+      name: businessCode
+      in: header
+      description: The 3 character business code. Use GCB for consumer banking.
+      required: false
+      style: simple
+      explode: false
+      schema:
+        type: string
+    uuid:
+      name: uuid
+      in: header
+      description: 128 bit UUID that you generate for every request
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Accept:
+      name: Accept
+      in: header
+      description: Content-Types that are acceptable for the response. Currently we
+        support application/json
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    Content-Type:
+      name: Content-Type
+      in: header
+      description: The media type of the body of the request (used with POST and PUT
+        requests) Currently we support application/json
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
+    clientDetails:
+      name: clientDetails
+      in: header
+      description: Device and browser information. Refer the developer portal for
+        more information. Please ensure the header is base64 encoded
+      required: false
+      style: simple
+      explode: false
+      schema:
+        type: string

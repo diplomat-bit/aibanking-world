@@ -62,6 +62,12 @@ if (fs.existsSync(firebaseConfigPath)) {
 
 app.use(cors());
 
+// OIDC Discovery Endpoint
+app.get("/.well-known/openid-configuration", (req: Request, res: Response) => {
+  const configPath = path.join(process.cwd(), "api", "oidc-config.json");
+  res.sendFile(configPath);
+});
+
 // Webhook needs raw body
 app.post("/api/v1/stripe/webhook", express.raw({ type: 'application/json' }), async (req: Request, res: Response) => {
   const stripeSig = req.headers['stripe-signature'] as string;

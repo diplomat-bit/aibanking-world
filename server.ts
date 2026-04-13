@@ -161,21 +161,6 @@ app.get("/api/v1/config/secrets", (req: Request, res: Response) => {
 });
 
 // Endpoint to get public config (non-sensitive)
-app.get("/api/v1/config/public", (req: Request, res: Response) => {
-  const config = getAppConfig();
-  const secrets = loadSecrets();
-  res.json({
-    auth0: {
-      domain: config.auth0.domain,
-      clientId: config.auth0.clientId
-    },
-    googleClientId: process.env.VITE_GOOGLE_CLIENT_ID || secrets.VITE_GOOGLE_CLIENT_ID || "",
-    azure: {
-      clientId: process.env.VITE_AZURE_CLIENT_ID || secrets.VITE_AZURE_CLIENT_ID || "",
-      authority: process.env.VITE_AZURE_AUTHORITY || secrets.VITE_AZURE_AUTHORITY || ""
-    }
-  });
-});
 
 app.post("/api/v1/config/secrets", (req: Request, res: Response) => {
   const newSecrets = req.body;

@@ -69,33 +69,41 @@ const ConfigLoader = ({ children }: { children: React.ReactNode }) => {
   const [pca, setPca] = React.useState<PublicClientApplication | null>(null);
 
   React.useEffect(() => {
-    fetch('/api/v1/config/public')
-      .then(res => res.json())
-      .then(async (data) => {
-        setConfig(data);
-        
-        const msalConfig = {
-          auth: {
-            clientId: data.azure?.clientId || import.meta.env.VITE_AZURE_CLIENT_ID || "bff526e7-323a-4ab1-8378-1afdf6936639", 
-            authority: data.azure?.authority || import.meta.env.VITE_AZURE_AUTHORITY || "https://login.microsoftonline.com/jamescitibankdemobusiness.onmicrosoft.com",
-            redirectUri: window.location.origin, 
-          },
-          cache: { cacheLocation: "sessionStorage" }
-        };
-        
-        try {
-          const instance = new PublicClientApplication(msalConfig);
-          await instance.initialize();
-          setPca(instance);
-        } catch (pcaErr) {
-          console.error("MSAL Initialization Failure:", pcaErr);
-          setError("Neural Identity Handshake Failed.");
-        }
-      })
-      .catch(err => {
-        console.error("Failed to load public config:", err);
-        setError("Failed to synchronize with Global Ledger.");
+    const config = {
+      auth0: {
+        domain: import.meta.env.VITE_AUTH0_DOMAIN || "",
+        clientId: import.meta.env.VITE_AUTH0_CLIENT_ID || ""
+      },
+      googleClientId: import.meta.env.VITE_GOOGLE_CLIENT_ID || "",
+      azure: {
+        clientId: import.meta.env.VITE_AZURE_CLIENT_ID || "bff526e7-323a-4ab1-8378-1afdf6936639",
+        authority: import.meta.env.VITE_AZURE_AUTHORITY || "https://login.microsoftonline.com/jamescitibankdemobusiness.onmicrosoft.com"
+      }
+    };
+
+    setConfig(config);
+    
+    const msalConfig = {
+      auth: {
+        clientId: config.azure.clientId,
+        authority: config.azure.authority,
+        redirectUri: window.location.origin, 
+      },
+      cache: { cacheLocation: "sessionStorage" }
+    };
+    
+    try {
+      const instance = new PublicClientApplication(msalConfig);
+      instance.initialize().then(() => {
+        setPca(instance);
+      }).catch((err) => {
+        console.error("MSAL Initialization Failure:", err);
+        setError("Neural Identity Handshake Failed.");
       });
+    } catch (pcaErr) {
+      console.error("MSAL Initialization Failure:", pcaErr);
+      setError("Neural Identity Handshake Failed.");
+    }
   }, []);
 
   if (error) {

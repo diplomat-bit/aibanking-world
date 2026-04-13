@@ -17,7 +17,7 @@ const PlaidLink: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/create_link_token', { method: 'POST' });
+      const response = await fetch('/api/v1/plaid/create-link-token', { method: 'POST' });
       const data = await response.json();
       if (data.link_token) {
         setLinkToken(data.link_token);
@@ -35,7 +35,7 @@ const PlaidLink: React.FC = () => {
   const exchangeToken = async (publicToken: string) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/exchange_public_token', {
+      const response = await fetch('/api/v1/plaid/exchange-public-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ public_token: publicToken }),

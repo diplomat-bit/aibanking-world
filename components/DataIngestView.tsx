@@ -20,7 +20,7 @@ const DataIngestView: React.FC = () => {
   useEffect(() => {
     const createLinkToken = async () => {
       try {
-        const response = await axios.post('/api/create_link_token');
+        const response = await axios.post('/api/v1/plaid/create-link-token');
         setLinkToken(response.data.link_token);
       } catch (error) {
         console.error("Error creating link token:", error);
@@ -32,7 +32,7 @@ const DataIngestView: React.FC = () => {
   const onSuccess = useCallback(async (public_token: string, metadata: any) => {
     setIsProcessing(true);
     try {
-      const exchangeResponse = await axios.post('/api/exchange_public_token', { public_token });
+      const exchangeResponse = await axios.post('/api/v1/plaid/exchange-public-token', { public_token });
       const { access_token } = exchangeResponse.data;
       
       const accountsResponse = await axios.post('/api/v1/plaid/accounts', {

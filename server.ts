@@ -30,7 +30,7 @@ const getStripe = () => {
 
 // Initialize Plaid
 const plaidConfig = new Configuration({
-  basePath: PlaidEnvironments[process.env.PLAID_ENV || 'production'],
+  basePath: PlaidEnvironments[process.env.PLAID_ENV || 'sandbox'],
   baseOptions: {
     headers: {
       'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
@@ -51,11 +51,10 @@ let adminDb: any = null;
 if (fs.existsSync(firebaseConfigPath)) {
   try {
     const config = JSON.parse(fs.readFileSync(firebaseConfigPath, "utf-8"));
-    // Note: In this environment, we usually don't have a service account key file
-    // but we can try to initialize with the project ID if it's available.
-    // However, for this specific task, we might just rely on the client-side 
-    // to update Firestore after redirecting back with a success token.
-    // Or we use the provided firebase-applet-config.json if it has enough info.
+    initializeApp({
+      projectId: config.projectId,
+    });
+    adminDb = getFirestore();
   } catch (e) {
     console.error("Firebase Admin Init Error:", e);
   }
@@ -198,79 +197,9 @@ const getAI = () => {
 };
 
 // Plaid Endpoints
-app.post("/api/create_link_token", async (req: Request, res: Response) => {
-  console.log("Creating Plaid link token...");
-  
-  if (!process.env.PLAID_CLIENT_ID || !process.env.PLAID_SECRET) {
-    return res.status(400).json({ error: "Plaid credentials missing. Please configure PLAID_CLIENT_ID and PLAID_SECRET." });
-  }
 
-  try {
-    const response = await plaidClient.linkTokenCreate({
-      user: { client_user_id: 'nexus_user_001' },
-      client_name: 'Nexus Terminal',
-      products: ['transactions' as any],
-      country_codes: ['US' as any],
-      language: 'en',
-    });
-    console.log("Plaid link token created:", response.data.link_token);
-    res.json({ link_token: response.data.link_token });
-  } catch (error: any) {
-    if (error.response && error.response.data) {
-      console.error("Plaid API Error Details:", JSON.stringify(error.response.data, null, 2));
-    } else {
-      console.error("Plaid link token creation error:", error);
-    }
-    res.status(500).json({ error: error.message, details: error.response?.data });
-  }
-});
 
-app.post("/api/exchange_public_token", async (req: Request, res: Response) => {
-  try {
-    const { public_token } = req.body;
-    if (!process.env.PLAID_CLIENT_ID) {
-      return res.status(400).json({ error: "Plaid credentials missing." });
-    }
-    const response = await plaidClient.itemPublicTokenExchange({
-      public_token,
-    });
-    res.json({ access_token: response.data.access_token, item_id: response.data.item_id });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
-app.post("/api/v1/plaid/transactions", async (req: Request, res: Response) => {
-  try {
-    const { access_token, start_date, end_date } = req.body;
-    if (!process.env.PLAID_CLIENT_ID) {
-      return res.status(400).json({ error: "Plaid credentials missing." });
-    }
-    const response = await plaidClient.transactionsGet({
-      access_token,
-      start_date,
-      end_date,
-    });
-    res.json({ transactions: response.data.transactions });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.post("/api/v1/plaid/accounts", async (req: Request, res: Response) => {
-  try {
-    const { access_token } = req.body;
-    if (!process.env.PLAID_CLIENT_ID) {
-      return res.status(400).json({ error: "Plaid credentials missing." });
-    }
-    const response = await plaidClient.accountsGet({
-      access_token,
-    });
-    res.json({ accounts: response.data.accounts });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // Stripe Endpoints
 app.post("/api/v1/stripe/create-checkout-session", async (req: Request, res: Response) => {
@@ -442,7 +371,7 @@ app.post("/api/v1/ai/recommendations", async (req: Request, res: Response) => {
     const prompt = `As Agora AI, an elite marketplace curator, suggest 6 highly personalized products for a high-net-worth individual based on these recent transactions: ${contextSummary}. 
     Respond in valid JSON format. Include: id, name, price, category, description, and aiReason (why it fits their spending profile).`;
 
-    const response = await callGemini('gemini-3-flash-preview', prompt, {
+    const response = await callGemini('gemini-2.0-flash', prompt, {
       responseMimeType: "application/json",
       responseSchema: {
         type: Type.OBJECT,
@@ -484,7 +413,7 @@ app.post("/api/v1/ai/forge", async (req: Request, res: Response) => {
     4. Performance Vectors (e.g. expected latency, throughput)
     Use professional, executive tone. No fluff.`;
 
-    const result = await callGemini("gemini-3-flash-preview", prompt);
+    const result = await callGemini("gemini-2.0-flash", prompt);
     res.json({ text: result.text });
   } catch (error: any) {
     console.error("AI Forge Error:", error);
@@ -494,9 +423,10 @@ app.post("/api/v1/ai/forge", async (req: Request, res: Response) => {
 
 app.get("/api/v1/citi/auth-url", (req: Request, res: Response) => {
   const config = getAppConfig().citi;
-  // Force https for the redirect URI as required by Citi and our production environment
+  // Use protocol-agnostic redirect URI
   const host = req.headers["x-forwarded-host"] || req.get("host");
-  const redirectUri = `https://${host}/citi/callback`;
+  const protocol = req.headers["x-forwarded-proto"] || "https";
+  const redirectUri = `${protocol}://${host}/citi/callback`;
   
   // Construct the Citi authorize URL based on the Swift snippet logic
   const authorizeUrl = `${config.authBaseUrl}?response_type=code&client_id=${config.clientId}&scope=accounts_details_transactions customers_profiles&countryCode=US&businessCode=GCB&locale=en_US&state=12093&redirect_uri=${encodeURIComponent(redirectUri)}`;
@@ -562,7 +492,7 @@ app.post("/api/v1/citi/accounts", async (req: Request, res: Response) => {
   }
 });
 
-app.all("/api/v1/citi/proxy/*", async (req: Request, res: Response) => {
+app.all(/^\/api\/v1\/citi\/proxy\/(.*)/, async (req: Request, res: Response) => {
   const config = getAppConfig().citi;
   const path = req.params[0];
   const url = `https://api.citi.com/${path}`;
@@ -603,17 +533,7 @@ app.get("/api/v1/azure-apps", (req: Request, res: Response) => {
       return res.json({ apps: [] });
     }
     const data = fs.readFileSync(appsPath, "utf8");
-    const apps = data.split(/\}\s*\n\s*\{/).map((str, i, arr) => {
-      let jsonStr = str.trim();
-      if (i !== 0) jsonStr = '{' + jsonStr;
-      if (i !== arr.length - 1) jsonStr = jsonStr + '}';
-      try {
-        return JSON.parse(jsonStr);
-      } catch(e) {
-        console.error("Failed to parse Azure app JSON:", jsonStr, e);
-        return null;
-      }
-    }).filter(Boolean);
+    const apps = JSON.parse(data);
     res.json({ apps });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

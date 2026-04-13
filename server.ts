@@ -350,7 +350,7 @@ app.post("/api/v1/plaid/transactions", async (req: Request, res: Response) => {
 // App Configuration Helper
 const getAppConfig = () => {
   const secrets = loadSecrets();
-  const citiClientId = process.env.CITI_CLIENT_ID || secrets.CITI_CLIENT_ID || "73709a4f-4cf2-418e-89a8-f39c1a849273";
+  const citiClientId = process.env.VITE_CITI_CLIENT_ID || secrets.VITE_CITI_CLIENT_ID || "73709a4f-4cf2-418e-89a8-f39c1a849273";
   const citiClientSecret = process.env.CITI_CLIENT_SECRET || secrets.CITI_CLIENT_SECRET || "SECRET";
   
   return {
@@ -574,12 +574,10 @@ async function startServer() {
     });
   }
 
-  // Only listen if not running on Vercel
-  if (!process.env.VERCEL) {
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  }
+  // Listen on the required port
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 }
 
 startServer();

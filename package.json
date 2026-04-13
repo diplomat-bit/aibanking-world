@@ -4,8 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "scripts": {
-  "install": "npm install --legacy-peer-deps",
+    "install": "npm install --legacy-peer-deps",
     "start": "tsx server.ts",
     "dev": "tsx server.ts",
     "build": "vite build",

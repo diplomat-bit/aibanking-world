@@ -1,4 +1,4 @@
-[
+
 {
   "app": "PROD Microsoft Defender For Cloud XDR",
   "appId": "bff526e7-323a-4ab1-8378-1afdf6936639",
@@ -7414,4 +7414,4 @@
   "appId": "f03ecedf-8e3c-45a6-be22-ea089d8224aa",
   "servicePrincipal": "created",
   "owner": "added"
-}]
+}

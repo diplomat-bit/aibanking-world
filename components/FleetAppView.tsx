@@ -44,10 +44,16 @@ export default function FleetAppView({ appId, setView }: FleetAppViewProps) {
     fetchApp();
   }, [appId]);
 
+  const isInIframe = window.self !== window.top;
+
   const handleLogin = async () => {
+    if (isInIframe) {
+      window.open(window.location.href, '_blank');
+      return;
+    }
     setAuthError(null);
     try {
-      await instance.loginPopup({ scopes: ["User.Read", "openid", "profile"] });
+      await instance.loginRedirect({ scopes: ["User.Read", "openid", "profile"] });
     } catch (e: any) {
       console.error("Auth Failure:", e);
       setAuthError(e.message || "Authentication failed.");
@@ -161,7 +167,7 @@ export default function FleetAppView({ appId, setView }: FleetAppViewProps) {
         )}
 
         <button onClick={handleLogin} className="px-8 py-4 bg-lime-500 text-black font-black rounded-2xl flex items-center gap-3 hover:scale-105 transition-transform">
-          <Lock size={18} /> AUTHORIZE_ACCESS
+          <Lock size={18} /> {isInIframe ? "OPEN IN NEW TAB TO SIGN IN" : "AUTHORIZE_ACCESS"}
         </button>
       </div>
     );

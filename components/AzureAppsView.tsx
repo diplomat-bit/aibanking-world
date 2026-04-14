@@ -50,10 +50,16 @@ const AzureAppsView: React.FC<AzureAppsViewProps> = ({ setView }) => {
     fetchApps();
   }, []);
 
+  const isInIframe = window.self !== window.top;
+
   const handleLogin = async () => {
+    if (isInIframe) {
+      window.open(window.location.href, '_blank');
+      return;
+    }
     setAuthError(null);
     try {
-      await instance.loginPopup({ scopes: ["User.Read", "openid", "profile"] });
+      await instance.loginRedirect({ scopes: ["User.Read", "openid", "profile"] });
     } catch (e: any) {
       console.error("Auth Failure:", e);
       setAuthError(e.message || "Authentication failed.");
@@ -123,7 +129,7 @@ const AzureAppsView: React.FC<AzureAppsViewProps> = ({ setView }) => {
         )}
 
         <button onClick={handleLogin} className="px-10 py-5 bg-lime-500 text-black font-black rounded-2xl flex items-center gap-3 hover:scale-105 transition-transform">
-          <Lock size={20} /> SPAWN AZURE HANDSHAKE
+          <Lock size={20} /> {isInIframe ? "OPEN IN NEW TAB TO SIGN IN" : "SPAWN AZURE HANDSHAKE"}
         </button>
       </div>
     );

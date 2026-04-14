@@ -519,7 +519,7 @@ app.all(/^\/api\/v1\/citi\/proxy\/(.*)/, async (req: Request, res: Response) => 
 
 app.get("/api/v1/azure-apps", (req: Request, res: Response) => {
   try {
-    const appsPath = path.join(process.cwd(), "apps", "apps.json");
+    const appsPath = "/apps/apps.json";
     if (!fs.existsSync(appsPath)) {
       return res.json({ apps: [] });
     }

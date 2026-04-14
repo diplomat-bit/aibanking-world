@@ -47,31 +47,10 @@ export default function AquariusDashboard({ setView }: { setView: (view: any) =>
   // --- 4. 2,200 APP NDJSON LOADER ---
   useEffect(() => {
     if (isAuthenticated) {
-      fetch('/apps/apps.json') // Corrected path to /apps/apps.json
-        .then(res => res.text())
-        .then(text => {
-          // The new apps.json format has multi-line JSON objects separated by newlines
-          // We can parse this by wrapping it in an array and adding commas
-          try {
-            // Replace "}\n{" with "},{" and wrap in brackets
-            const jsonString = '[' + text.replace(/}\s*\n\s*{/g, '},{') + ']';
-            const parsedApps = JSON.parse(jsonString);
-            setRawApps(parsedApps);
-          } catch (e) {
-            console.error("Failed to parse apps.json with fast method, falling back to regex", e);
-            // Fallback for more complex formatting
-            const regex = /\{[\s\S]*?\}(?=\s*\{|\s*$)/g;
-            const matches = text.match(regex) || [];
-            const parsedApps = matches.map(match => {
-              try {
-                return JSON.parse(match);
-              } catch (err) {
-                console.error("Failed to parse individual app:", match, err);
-                return null;
-              }
-            }).filter(Boolean);
-            setRawApps(parsedApps);
-          }
+      fetch('/apps/apps.json')
+        .then(res => res.json())
+        .then(data => {
+          setRawApps(data);
         })
         .catch(err => console.error("Fleet Load Error:", err));
     }
